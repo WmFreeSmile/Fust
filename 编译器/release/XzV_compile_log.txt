@@ -1,0 +1,15 @@
+﻿VisualFreeBASIC++ Tools
+没有找到项目配置文件'project.ini'，此次编译跳过优化
+FreeBASIC Compiler - Version 1.10.1 (2023-12-24), built for win32 (32bit)
+Copyright (C) 2004-2023 The FreeBASIC development team.
+开始编译时间:2025-03-07 13:56:49 , 解析代码:0.2秒 , 编译代码:1.7秒 , 总用时间:1.9秒
+目标：win32, 686, 32bit
+后端：gas
+编译：CODEGEN_XzV_MAIN.bas -o CODEGEN_XzV_MAIN.asm (主模块)
+CODEGEN_XzV_XzV_MODULE.inc(859) warning 1(2): 将非指针变量作为指针传递，是参数 2 of CH_E58AA0E585A5_()
+CODEGEN_XzV_XzV_MODULE.inc(863) warning 4(2): 可疑的指针赋值
+CODEGEN_XzV_XzV_MODULE.inc(874) warning 5(1): 隐式转换
+CODEGEN_XzV_CFRt_MODULE.inc(23) warning 22(1): 删除未定义的ANY指针
+组件：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win32\as.exe --32 --strip-local-absolute "CODEGEN_XzV_MAIN.asm" -o "CODEGEN_XzV_MAIN.o"
+资源：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win32\GoRC.exe /ni /nw /o /fo "XzV_RESOURCE.obj" "XzV_RESOURCE.rc"
+链接：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win32\ld.exe -m i386pe -o "编译器.exe" -subsystem console -T "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32\fbextra.x" --stack 1048576,1048576 -s -L "C:\Apps\VISUAL~1\Compile\expand\lib\win32" -L "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32" -L "." "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32\crt2.o" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32\crtbegin.o" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32\fbrt0.o" "CODEGEN_XzV_MAIN.o" "XzV_RESOURCE.obj" "-(" -lkernel32 -lgdi32 -lmsimg32 -luser32 -lversion -ladvapi32 -limm32 -lshell32 -lole32 -luuid -loleaut32 -lcomctl32 -luxtheme -lpsapi -lcomdlg32 -lshlwapi -lddraw -ldxguid -lgdiplus -lfb -lgcc -lmsvcrt -lmingw32 -lmingwex -lmoldname -lgcc_eh "-)" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win32\crtend.o" 

@@ -1,0 +1,307 @@
+namespace Kernel{
+	namespace Lang{
+		class Object@{
+			sub native self()@;
+			sub native ~self()@;
+		}
+		class Byte extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator&(left as Byte,right as Byte) as Byte@;
+			function native static operator|(left as Byte,right as Byte) as Byte@;
+			function native static operator<<(left as Byte,right as Int) as Byte@;
+			function native static operator>>(left as Byte,right as Int) as Byte@;
+			function native static operator~(left as Byte,right as Byte) as Byte@;
+			function native static operator+(left as Byte,right as Byte) as Byte@;
+			function native static operator-(left as Byte,right as Byte) as Byte@;
+			function native static operator*(left as Byte,right as Byte) as Byte@;
+			function native static operator/(left as Byte,right as Byte) as Byte@;
+			function native static operator%(left as Byte,right as Byte) as Byte@;
+			function native static operator^(left as Byte,right as Byte) as Byte@;
+			function native static operator\(left as Byte,right as Byte) as Byte@;
+			function native static operator?*(left as Byte,right as Byte) as Byte@;
+			function native static operator?/(left as Byte,right as Byte) as Byte@;
+			function native static operator?%(left as Byte,right as Byte) as Byte@;
+			function native static operator?\(left as Byte,right as Byte) as Byte@;
+			function native static operator==(left as Byte,right as Byte) as Bool@;
+			function native static operator<>(left as Byte,right as Byte) as Bool@;
+			function native static operator>=(left as Byte,right as Byte) as Bool@;
+			function native static operator<=(left as Byte,right as Byte) as Bool@;
+			function native static operator>(left as Byte,right as Byte) as Bool@;
+			function native static operator<(left as Byte,right as Byte) as Bool@;
+			function native static operator?>=(left as Byte,right as Byte) as Bool@;
+			function native static operator?<=(left as Byte,right as Byte) as Bool@;
+			function native static operator?>(left as Byte,right as Byte) as Bool@;
+			function native static operator?<(left as Byte,right as Byte) as Bool@;
+		}
+		class Short extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator&(left as Short,right as Short) as Short@;
+			function native static operator|(left as Short,right as Short) as Short@;
+			function native static operator<<(left as Short,right as Int) as Short@;
+			function native static operator>>(left as Short,right as Int) as Short@;
+			function native static operator~(left as Short,right as Short) as Short@;
+			function native static operator+(left as Short,right as Short) as Short@;
+			function native static operator-(left as Short,right as Short) as Short@;
+			function native static operator*(left as Short,right as Short) as Short@;
+			function native static operator/(left as Short,right as Short) as Short@;
+			function native static operator%(left as Short,right as Short) as Short@;
+			function native static operator^(left as Short,right as Short) as Short@;
+			function native static operator\(left as Short,right as Short) as Short@;
+			function native static operator?*(left as Short,right as Short) as Short@;
+			function native static operator?/(left as Short,right as Short) as Short@;
+			function native static operator?%(left as Short,right as Short) as Short@;
+			function native static operator?\(left as Short,right as Short) as Short@;
+			function native static operator==(left as Short,right as Short) as Bool@;
+			function native static operator<>(left as Short,right as Short) as Bool@;
+			function native static operator>=(left as Short,right as Short) as Bool@;
+			function native static operator<=(left as Short,right as Short) as Bool@;
+			function native static operator>(left as Short,right as Short) as Bool@;
+			function native static operator<(left as Short,right as Short) as Bool@;
+			function native static operator?>=(left as Short,right as Short) as Bool@;
+			function native static operator?<=(left as Short,right as Short) as Bool@;
+			function native static operator?>(left as Short,right as Short) as Bool@;
+			function native static operator?<(left as Short,right as Short) as Bool@;
+		}
+		class Int extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator&(left as Int,right as Int) as Int@;
+			function native static operator|(left as Int,right as Int) as Int@;
+			function native static operator<<(left as Int,right as Int) as Int@;
+			function native static operator>>(left as Int,right as Int) as Int@;
+			function native static operator~(left as Int,right as Int) as Int@;
+			function native static operator+(left as Int,right as Int) as Int@;
+			function native static operator-(left as Int,right as Int) as Int@;
+			function native static operator*(left as Int,right as Int) as Int@;
+			function native static operator/(left as Int,right as Int) as Int@;
+			function native static operator%(left as Int,right as Int) as Int@;
+			function native static operator^(left as Int,right as Int) as Int@;
+			function native static operator\(left as Int,right as Int) as Int@;
+			function native static operator?*(left as Int,right as Int) as Int@;
+			function native static operator?/(left as Int,right as Int) as Int@;
+			function native static operator?%(left as Int,right as Int) as Int@;
+			function native static operator?\(left as Int,right as Int) as Int@;
+			function native static operator==(left as Int,right as Int) as Bool@;
+			function native static operator<>(left as Int,right as Int) as Bool@;
+			function native static operator>=(left as Int,right as Int) as Bool@;
+			function native static operator<=(left as Int,right as Int) as Bool@;
+			function native static operator>(left as Int,right as Int) as Bool@;
+			function native static operator<(left as Int,right as Int) as Bool@;
+			function native static operator?>=(left as Int,right as Int) as Bool@;
+			function native static operator?<=(left as Int,right as Int) as Bool@;
+			function native static operator?>(left as Int,right as Int) as Bool@;
+			function native static operator?<(left as Int,right as Int) as Bool@;
+		}
+		class Long extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator&(left as Long,right as Long) as Long@;
+			function native static operator|(left as Long,right as Long) as Long@;
+			function native static operator<<(left as Long,right as Int) as Long@;
+			function native static operator>>(left as Long,right as Int) as Long@;
+			function native static operator~(left as Long,right as Long) as Long@;
+			function native static operator+(left as Long,right as Long) as Long@;
+			function native static operator-(left as Long,right as Long) as Long@;
+			function native static operator*(left as Long,right as Long) as Long@;
+			function native static operator/(left as Long,right as Long) as Long@;
+			function native static operator%(left as Long,right as Long) as Long@;
+			function native static operator^(left as Long,right as Long) as Long@;
+			function native static operator\(left as Long,right as Long) as Long@;
+			function native static operator?*(left as Long,right as Long) as Long@;
+			function native static operator?/(left as Long,right as Long) as Long@;
+			function native static operator?%(left as Long,right as Long) as Long@;
+			function native static operator?\(left as Long,right as Long) as Long@;
+			function native static operator==(left as Long,right as Long) as Bool@;
+			function native static operator<>(left as Long,right as Long) as Bool@;
+			function native static operator>=(left as Long,right as Long) as Bool@;
+			function native static operator<=(left as Long,right as Long) as Bool@;
+			function native static operator>(left as Long,right as Long) as Bool@;
+			function native static operator<(left as Long,right as Long) as Bool@;
+			function native static operator?>=(left as Long,right as Long) as Bool@;
+			function native static operator?<=(left as Long,right as Long) as Bool@;
+			function native static operator?>(left as Long,right as Long) as Bool@;
+			function native static operator?<(left as Long,right as Long) as Bool@;
+		}
+		class Float extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator+(left as Float,right as Float) as Float@;
+			function native static operator-(left as Float,right as Float) as Float@;
+			function native static operator*(left as Float,right as Float) as Float@;
+			function native static operator/(left as Float,right as Float) as Float@;
+			function native static operator^(left as Float,right as Float) as Float@;
+			function native static operator\(left as Float,right as Float) as Float@;
+			function native static operator==(left as Float,right as Float) as Bool@;
+			function native static operator<>(left as Float,right as Float) as Bool@;
+			function native static operator>=(left as Float,right as Float) as Bool@;
+			function native static operator<=(left as Float,right as Float) as Bool@;
+			function native static operator>(left as Float,right as Float) as Bool@;
+			function native static operator<(left as Float,right as Float) as Bool@;
+		}
+		class Double extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator+(left as Double,right as Double) as Double@;
+			function native static operator-(left as Double,right as Double) as Double@;
+			function native static operator*(left as Double,right as Double) as Double@;
+			function native static operator/(left as Double,right as Double) as Double@;
+			function native static operator^(left as Double,right as Double) as Double@;
+			function native static operator\(left as Double,right as Double) as Double@;
+			function native static operator==(left as Double,right as Double) as Bool@;
+			function native static operator<>(left as Double,right as Double) as Bool@;
+			function native static operator>=(left as Double,right as Double) as Bool@;
+			function native static operator<=(left as Double,right as Double) as Bool@;
+			function native static operator>(left as Double,right as Double) as Bool@;
+			function native static operator<(left as Double,right as Double) as Bool@;
+		}
+		class Bool extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator&(left as Bool,right as Bool) as Bool@;
+			function native static operator|(left as Bool,right as Bool) as Bool@;
+			function native static operator~(left as Bool,right as Bool) as Bool@;
+			function native static operator==(left as Bool,right as Bool) as Bool@;
+			function native static operator<>(left as Bool,right as Bool) as Bool@;
+		}
+		class String extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+			function native static operator+(left as String,right as String) as String@;
+			function native static operator==(left as String,right as String) as Bool@;
+			function native static operator<>(left as String,right as String) as Bool@;
+			function native static operator>=(left as String,right as String) as Bool@;
+			function native static operator<=(left as String,right as String) as Bool@;
+			function native static operator>(left as String,right as String) as Bool@;
+			function native static operator<(left as String,right as String) as Bool@;
+			
+			function native to_upper() as String@;
+			function native to_lower() as String@;
+			
+			function native left(n as Int) as String@;
+			function native right(n as Int) as String@;
+			function native mid(start as Int,n as Int) as String@;
+			
+			function native in_str(sub_string as String) as Int@;
+			function native in_str(sub_string as String,start as Int) as Int@;
+			function native in_str_rev(sub_string as String) as Int@;
+			function native in_str_rev(sub_string as String,start as Int) as Int@;
+			
+			function native l_trim(trimset as String) as String@;
+			function native r_trim(trimset as String) as String@;
+			function native trim(trimset as String) as String@;
+			
+			function native get_length() as Int@;
+		}
+		
+		/#
+		class List<T> extends Object@{
+			sub native self()@;
+			sub native ~self()@;
+			
+		}
+		#/
+		
+		class Case extends Object@{
+			function native static to_int(val as String) as Int@;
+			function native static to_string(val as Int) as String@;
+		}
+	}
+	namespace System{
+		class Console extends Kernel::Lang::Object@{
+			sub native static write_line(text as Kernel::Lang::String)@;
+			sub native static write(text as Kernel::Lang::String)@;
+			function native static read() as Kernel::Lang::Int@;
+			function native static read_line() as Kernel::Lang::String@;
+		}
+	}
+}
+namespace Math{
+	class MathMain@{
+		function native static add(a as Kernel::Lang::Int,b as Kernel::Lang::Int) as Kernel::Lang::Int@;
+	}
+}
+
+namespace User{
+	class Class1 extends Kernel::Lang::Object@{
+		dim x as Kernel::Lang::Int@;
+		dim y as Kernel::Lang::Int@;
+		sub self()@{
+			
+		}@
+		sub ~self()@{
+			
+		}@
+	}
+	class Program extends Kernel::Lang::Object@{
+		dim static var1 as Kernel::Lang::Int@;
+		dim static var2 as Kernel::Lang::String@;
+		
+		sub static write_int(arg as Kernel::Lang::Int)@{
+			Kernel::System::Console::write_line(
+				Kernel::Lang::Case::to_string(arg)
+			);
+		}@
+		
+		function static output(arg as Kernel::Lang::Object) as Kernel::Lang::Object@{
+			return arg;
+		}@
+		
+		
+		function static test_return() as Kernel::Lang::Bool@{
+			return true;
+		}@
+		
+		sub static main()@{
+			
+			if(true){
+				Kernel::System::Console::write_line("true");
+			}else{
+				Kernel::System::Console::write_line("false");
+			}
+			
+			if(Program::test_return()){
+				Kernel::System::Console::write_line("true2");
+			}
+			
+			Program.var1=111;
+			Program.var2="Hello";
+			Program::output(Program.var2);
+			
+			
+			dim a as Class1;
+			a=new Class1();
+			a.x=222;
+			a.y=333;
+			Program::output(a.x);
+			
+			dim b as Test<Kernel::Lang::Int>;
+			b=new Test<Kernel::Lang::Int>();
+			b.var1=444;
+			b.var2=555;
+			Program::write_int(
+				b.var1
+				=>
+				Kernel::Lang::Int
+			);
+		}@
+	}
+	
+	#泛型测试
+	class Test<T extends Kernel::Lang::Object> extends Kernel::Lang::Object@{
+		dim var1 as T@;##此时泛型T会被擦除成Kernel::Lang::Object
+		dim var2 as T@;##在当前类域里面，所有T都会被当成Kernel::Lang::Object处理
+		sub self()@{}@
+		sub ~self()@{}@
+		
+	}
+}

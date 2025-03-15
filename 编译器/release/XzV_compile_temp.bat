@@ -1,0 +1,1 @@
+"C:\Apps\VISUAL~1\Compile\FREEBA~3.0\fbc32.exe" -i "C:\Apps\VISUAL~1\Control" -i "C:\Apps\VISUAL~1\Compile\expand\inc" -p "C:\Apps\VISUAL~1\Compile\expand\lib\win32" -x "±àÒëÆ÷.exe" CODEGEN_XzV_MAIN.bas -v XzV_RESOURCE.rc > XzV_compile_log.txt 2>&1
