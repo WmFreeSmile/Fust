@@ -1,0 +1,9 @@
+VisualFreeBASIC++ Tools
+没有找到项目配置文件'project.ini'，此次编译跳过优化
+FreeBASIC Compiler - Version 1.10.1 (2023-12-24), built for win64 (64bit)
+Copyright (C) 2004-2023 The FreeBASIC development team.
+standalone
+target:       win64, x86-64, 64bit
+backend:      gas64
+compiling:    CODEGEN_XzV_MAIN.bas -o CODEGEN_XzV_MAIN.asm (main module)
+CODEGEN_XzV_MAIN.bas() error 23: File not found, CODEGEN_XzV_MAIN.bas

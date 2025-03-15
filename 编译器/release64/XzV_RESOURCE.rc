@@ -1,0 +1,40 @@
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION 1,0,0,892
+PRODUCTVERSION 1,0,0,892
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS 0x0
+FILEOS VOS_UNKNOWN
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      
+      
+      VALUE "FileVersion",      "1.0.0.892\0"
+      VALUE "ProductVersion",   "1.0.0.892\0"
+      
+      VALUE "InternalName",     "编译器\0"
+      VALUE "OriginalFilename", "编译器.exe\0"
+      
+      
+      
+    END
+  END
+  BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1252
+    END
+END
+
+
+AAAAA_APPICON ICON DISCARDABLE "..\\IMAGES\\DEFAULT.ICO"
+
+
+
+
+
+//  WinXP 主题支持清单信息
+1 24 "CODEGEN_XzV.Exe.Manifest"

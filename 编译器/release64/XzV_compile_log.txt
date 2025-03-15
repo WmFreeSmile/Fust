@@ -1,0 +1,43 @@
+﻿VisualFreeBASIC++ Tools
+没有找到项目配置文件'project.ini'，此次编译跳过优化
+FreeBASIC Compiler - Version 1.10.1 (2023-12-24), built for win64 (64bit)
+Copyright (C) 2004-2023 The FreeBASIC development team.
+开始编译时间:2025-03-15 17:43:47 , 解析代码:0.0秒 , 编译代码:1.5秒 , 总用时间:1.5秒
+目标：win64, x86-64, 64bit
+后端：gas64
+编译：CODEGEN_XzV_MAIN.bas -o CODEGEN_XzV_MAIN.asm (主模块)
+CODEGEN_XzV_XzV_MODULE.inc(980) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(983) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(986) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(989) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(992) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(995) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(998) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1001) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1004) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1007) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1029) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1032) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1074) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1077) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1080) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1083) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1086) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1089) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1092) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1095) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1098) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1128) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1131) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1134) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1137) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1140) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1406) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_XzV_MODULE.inc(1561) warning 1(2): 将非指针变量作为指针传递，是参数 2 (CH_E79BAEE6A087_) of CH_E58AA0E585A5_()
+CODEGEN_XzV_XzV_MODULE.inc(1565) warning 4(2): 可疑的指针赋值
+CODEGEN_XzV_XzV_MODULE.inc(1576) warning 5(1): 隐式转换
+CODEGEN_XzV_XzV_MODULE.inc(1679) warning 35(1): 有符号和无符号混合的操作数
+CODEGEN_XzV_CFRt_MODULE.inc(23) warning 22(1): 删除未定义的ANY指针
+组件：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win64\as.exe --64 --strip-local-absolute "CODEGEN_XzV_MAIN.asm" -o "CODEGEN_XzV_MAIN.o"
+资源：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win64\GoRC.exe /ni /nw /o /machine X64 /fo "XzV_RESOURCE.obj" "XzV_RESOURCE.rc"
+链接：C:\Apps\VISUAL~1\Compile\FREEBA~3.0\bin\win64\ld.exe -m i386pep -o "编译器.exe" -subsystem console -T "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64\fbextra.x" --stack 2097152,2097152 -s -L "C:\Apps\VISUAL~1\Compile\expand\lib\win64" -L "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64" -L "." "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64\crt2.o" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64\crtbegin.o" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64\fbrt0.o" "CODEGEN_XzV_MAIN.o" "XzV_RESOURCE.obj" "-(" -lkernel32 -lgdi32 -lmsimg32 -luser32 -lversion -ladvapi32 -limm32 -lshell32 -lole32 -luuid -loleaut32 -lcomctl32 -luxtheme -lpsapi -lcomdlg32 -lshlwapi -lddraw -ldxguid -lgdiplus -lfb -lgcc -lmsvcrt -lmingw32 -lmingwex -lmoldname -lgcc_eh "-)" "C:\Apps\VISUAL~1\Compile\FREEBA~3.0\lib\win64\crtend.o" 
