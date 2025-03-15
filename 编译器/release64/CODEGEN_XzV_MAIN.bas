@@ -1,6 +1,6 @@
 '-----------------------------------------------------------------------------
 ' 由 VisualFreeBasic 5.8.11 生成的源代码
-' 生成时间：2025年03月15日 17时47分16秒
+' 生成时间：2025年03月15日 17时48分58秒
 ' 更多信息请访问 www.yfvb.com 
 '-----------------------------------------------------------------------------
 
@@ -159,7 +159,7 @@ Sub Setting_up_Application_Common_Information()
    App.FileMajor = 1
    App.FileMinor = 0
    App.FileRevision = 0
-   App.FileBuild = 893
+   App.FileBuild = 894
    
    'App.hInstance 在WinMain / LibMain中设置
    
