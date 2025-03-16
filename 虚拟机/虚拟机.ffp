@@ -1,6 +1,6 @@
 ﻿#VisualFreeBasic_Project#  Version=5.8.11
-NumObjects=11
-ProjectName=编译器
+NumObjects=6
+ProjectName=虚拟机
 CompilationMode=0
 CompilationDebug=0
 ProjectType=GUI
@@ -11,19 +11,19 @@ OmitInformation=0
 StartupIcon=
 UseWinXPthemes=-1
 StrUnicode=0
-UseAdminPriv=-1
+UseAdminPriv=0
 DeleteGeneratedCode=-1
 Namespace=0
 AddCompOps= -gen gas64
-LastRunFilename=编译器.exe
+LastRunFilename=虚拟机.exe
 Major=1
 Minor=0
 Revision=0
-Build=15
+Build=4
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=923
+FileBuild=41
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -34,23 +34,13 @@ LegalTrademarks=
 ProductName=
 
 [Objects]
-Module=.\modules\表.Inc|0|31||Yes|
-Module=.\modules\词法器.Inc|121|1994||Yes|
-Module=.\modules\编译器.Inc|1767|92176||Yes|
-Module=.\modules\文件.Inc|0|1603||Yes|
-Module=.\modules\对象管理.Inc|0|49||Yes|
-Module=.\modules\宏.Inc|18|1411||Yes|
-Module=.\modules\哈希算法.Inc|0|45||Yes|
 Form=.\forms\Form1.frm|0|4||Yes|
+Module=.\modules\虚拟机.Inc|122|3850||Yes|
+Module=.\modules\文件.Inc|0|446||Yes|
 
-TopTab=#FF_WinMain#|False|0|5|1125
-TopTab=.\modules\编译器.Inc|True|0|1767|92190
-TopTab=.\modules\文件.Inc|False|0|57|1603
-TopTab=.\modules\对象管理.Inc|False|0|0|49
-TopTab=.\modules\词法器.Inc|False|0|121|1994
-TopTab=.\modules\哈希算法.Inc|False|0|0|45
-TopTab=.\modules\表.Inc|False|0|0|31
-TopTab=.\modules\宏.Inc|False|0|18|1411
+TopTab=.\modules\虚拟机.Inc|True|0|122|3850
+TopTab=#FF_WinMain#|False|0|0|1134
+TopTab=.\modules\文件.Inc|False|0|0|446
 #END_MAIN_PROPERTIES#
 
 
@@ -68,9 +58,6 @@ TopTab=.\modules\宏.Inc|False|0|18|1411
 #include Once "vbcompat.bi"     '一些兼容VB的语句和常数，不包含就会无法使用它们了。
 #include Once "fbthread.bi"     'VisualFreeBasic线程语句支持库，要用线程语句，就必须包含。
 
-#include Once "crt/mem.bi" 'ln 9  
-#include Once "inc/md5.bi"
-#include Once "dir.bi" 'ln 7  
 '以上 包含文件 会影响最终编译生成文件的大小，而不会影响运行效率，对于文件大小比较敏感的，可以根据需要调整。
 
 '当你打开这个模块的同时，证明你已经对 VisualFreeBasic 有所了解，即将进入高手阶段。
@@ -105,12 +92,12 @@ Function FF_WINMAIN(ByVal hInstance As HINSTANCE) As Long '程序入口函数
    ' 您可以在此函数做程序初始化。
    ' -------------------------------------------------------------------------------------------
    ' (这里的EXE、DLL表示自己程序，无法获取其它EXE、DLL入口和出口)
-   编译器.启动()
+   虚拟机.启动()
    
    Function = False   
 End Function
 
-Sub FF_WINEND(ByVal hInstance As HINSTANCE) '程序出口，程序终止后的最后代码。
+Sub FF_WINEND(ByVal HINSTANCE As HINSTANCE) '程序出口，程序终止后的最后代码。
    'hInstance EXE或DLL的模块句柄，就是在内存中的地址，EXE 通常固定为 &H400000  DLL 一般不固定 
    '编译为 LIB静态库时，这里是无任何用处 
    ' -------------------------------------------------------------------------------------------

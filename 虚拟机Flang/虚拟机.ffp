@@ -1,29 +1,29 @@
 ﻿#VisualFreeBasic_Project#  Version=5.8.11
-NumObjects=11
-ProjectName=编译器
+NumObjects=15
+ProjectName=虚拟机
 CompilationMode=0
-CompilationDebug=0
+CompilationDebug=-1
 ProjectType=GUI
-UseGDIPlus=1
+UseGDIPlus=-1
 ShowConsole=-1
 MultiLanguage=0
 OmitInformation=0
 StartupIcon=
 UseWinXPthemes=-1
-StrUnicode=0
-UseAdminPriv=-1
-DeleteGeneratedCode=-1
+StrUnicode=-1
+UseAdminPriv=0
+DeleteGeneratedCode=0
 Namespace=0
-AddCompOps= -gen gas64
-LastRunFilename=编译器.exe
+AddCompOps= -gen gcc -O 2
+LastRunFilename=虚拟机.exe
 Major=1
 Minor=0
 Revision=0
-Build=15
+Build=1554
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=923
+FileBuild=1554
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -34,23 +34,34 @@ LegalTrademarks=
 ProductName=
 
 [Objects]
-Module=.\modules\表.Inc|0|31||Yes|
-Module=.\modules\词法器.Inc|121|1994||Yes|
-Module=.\modules\编译器.Inc|1767|92176||Yes|
-Module=.\modules\文件.Inc|0|1603||Yes|
-Module=.\modules\对象管理.Inc|0|49||Yes|
-Module=.\modules\宏.Inc|18|1411||Yes|
-Module=.\modules\哈希算法.Inc|0|45||Yes|
-Form=.\forms\Form1.frm|0|4||Yes|
+Module=.\modules\常量.Inc|0|165||Yes|
+Module=.\modules\全局变量.Inc|0|123||Yes|
+Module=.\modules\宏.Inc|0|212||Yes|
+Module=.\modules\指令集.Inc|141|4627||Yes|
+Module=.\modules\结构体.Inc|84|1485||Yes|
+Module=.\modules\其他.Inc|73|2979||Yes|
+Module=.\modules\启动.Inc|50|1508||Yes|
+Module=.\modules\线程.Inc|392|13410||Yes|
+Module=.\modules\加载器.Inc|238|5522||Yes|
+Module=.\modules\库接口.Inc|14|933||Yes|
+Module=.\modules\垃圾回收器.Inc|103|3555||Yes|
+Module=.\modules\即时编译.Inc|0|0||Yes|
 
-TopTab=#FF_WinMain#|False|0|5|1125
-TopTab=.\modules\编译器.Inc|True|0|1767|92190
-TopTab=.\modules\文件.Inc|False|0|57|1603
-TopTab=.\modules\对象管理.Inc|False|0|0|49
-TopTab=.\modules\词法器.Inc|False|0|121|1994
-TopTab=.\modules\哈希算法.Inc|False|0|0|45
-TopTab=.\modules\表.Inc|False|0|0|31
-TopTab=.\modules\宏.Inc|False|0|18|1411
+TopTab=.\modules\常量.Inc|False|0|0|165
+TopTab=.\modules\其他.Inc|False|0|73|2979
+TopTab=.\modules\启动.Inc|False|0|50|1508
+TopTab=.\modules\全局变量.Inc|False|0|0|123
+TopTab=.\modules\线程.Inc|False|0|416|13410
+TopTab=.\modules\结构体.Inc|False|0|88|1485
+TopTab=.\modules\加载器.Inc|True|0|221|5954
+TopTab=.\modules\指令集.Inc|False|0|141|4627
+TopTab=.\modules\宏.Inc|False|0|0|212
+TopTab=.\modules\库接口.Inc|False|0|14|933
+TopTab=.\modules\垃圾回收器.Inc|False|0|103|3555
+TopTab=#FF_AppStart#|False|0|15|1594
+TopTab=#FF_WinMain#|False|0|11|1167
+TopTab=#FF_PumpHook#|False|0|0|0
+TopTab=.\modules\即时编译.Inc|False|0|0|0
 #END_MAIN_PROPERTIES#
 
 
@@ -62,15 +73,23 @@ TopTab=.\modules\宏.Inc|False|0|18|1411
 
 #define UNICODE                 '表示WIN的API默认使用 W系列，宽字符处理，如果删除（使用ASCII字符）会造成控件和API使用的代码编写方式，影响深远。
 #lang "FB"                      '表示为标准FB格式
-#include Once "windows.bi"      'WIN系统基础库，主要是WIN系统常用的API，不使用API可以不包含它。
-#include Once "win/shlobj.bi"   'WIN系统对象库，shell32.dll的头文件，主要涉及shell及通用对话框等。
-#include Once "afx/CWindow.inc" 'WinFBX 库，是WIN系统增强基础库，使用窗口和控件必须要用到它。
-#include Once "vbcompat.bi"     '一些兼容VB的语句和常数，不包含就会无法使用它们了。
-#include Once "fbthread.bi"     'VisualFreeBasic线程语句支持库，要用线程语句，就必须包含。
-
-#include Once "crt/mem.bi" 'ln 9  
-#include Once "inc/md5.bi"
+'#include Once "windows.bi"      'WIN系统基础库，主要是WIN系统常用的API，不使用API可以不包含它。
+'#include Once "win/shlobj.bi"   'WIN系统对象库，shell32.dll的头文件，主要涉及shell及通用对话框等。
+'#include Once "afx/CWindow.inc" 'WinFBX 库，是WIN系统增强基础库，使用窗口和控件必须要用到它。
+'#include Once "vbcompat.bi"     '一些兼容VB的语句和常数，不包含就会无法使用它们了。
+'#include Once "fbthread.bi" 'VisualFreeBasic线程语句支持库，要用线程语句，就必须包含。
+'#include Once "crt/setjmp.bi" 'ln 66
 #include Once "dir.bi" 'ln 7  
+
+#include "MAP.bi"
+#include "LIST.bi"
+
+
+
+MMapTemplate(ULongInt, Integer)
+
+'MMapTemplate(Integer, Integer)
+
 '以上 包含文件 会影响最终编译生成文件的大小，而不会影响运行效率，对于文件大小比较敏感的，可以根据需要调整。
 
 '当你打开这个模块的同时，证明你已经对 VisualFreeBasic 有所了解，即将进入高手阶段。
@@ -91,7 +110,8 @@ TopTab=.\modules\宏.Inc|False|0|18|1411
 '加工过程产生临时文件，在工程属性里设置是否自动删除。
 [FF_APPSTART_END]
 [FF_WINMAIN_START]
-Function FF_WINMAIN(ByVal hInstance As HINSTANCE) As Long '程序入口函数
+
+Function FF_WINMAIN(ByVal HINSTANCE As HINSTANCE) As Long '程序入口函数
    'hInstance EXE或DLL的模块句柄，就是在内存中的地址，EXE 通常固定为 &H400000  DLL 一般不固定 
    '编译为 LIB静态库时，这里是无任何用处 
    ' -------------------------------------------------------------------------------------------
@@ -105,7 +125,8 @@ Function FF_WINMAIN(ByVal hInstance As HINSTANCE) As Long '程序入口函数
    ' 您可以在此函数做程序初始化。
    ' -------------------------------------------------------------------------------------------
    ' (这里的EXE、DLL表示自己程序，无法获取其它EXE、DLL入口和出口)
-   编译器.启动()
+   
+   main()
    
    Function = False   
 End Function
@@ -123,7 +144,7 @@ Sub FF_WINEND(ByVal hInstance As HINSTANCE) '程序出口，程序终止后的�
    '      AfxMsg "EXE退出"
    ' -------------------------------------------------------------------------------------------
    ' (这里的EXE、DLL表示自己程序，无法获取其它EXE、DLL入口和出口)
-
+   
 End Sub
 
 

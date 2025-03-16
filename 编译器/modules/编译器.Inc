@@ -175,7 +175,6 @@ Type 方法信息
    Declare Sub 指令_加载逻辑(值 As BOOL)
    Declare Sub 指令_创建变量(序列 As Integer)
    Declare Sub 指令_销毁变量(序列 As Integer)
-   
 End Type
 
 Sub 方法信息.编码数据()
@@ -755,19 +754,20 @@ Sub 语法_类(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
                 ReDim Preserve 引用->泛型表(索引)
                 引用->泛型表(索引) = 对象管理.加入(New 泛型信息)
                 引用->泛型表(索引)->名称 = Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
-                
+                引用->泛型表(索引)->引用类型表 = 对象管理.加入(New 表.线性表)
                 
                 指针 = 词法器.窥视()
                 If 指针->类型 = 词法器.单元类型.关键字 AndAlso Cast(词法器.单元信息_关键字 Ptr, 指针)->类型 = 词法器.关键字类型.key_extends Then
                     词法器.取下一个单元()
                     
                     表达式(模式, 编译信息指针, 0)
-                    If *表达式结果 Is 表达式格式_类型 = False OrElse Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 <> 类型类型.类 Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
+                    If *表达式结果 Is 表达式格式_类型 = False OrElse *Cast(表达式格式_类型 Ptr, 表达式结果)->类型 Is 类型格式_类=False Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
                     引用->泛型表(索引)->继承 = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
                     
                 Else
                     引用->泛型表(索引)->继承 = Cast(类型格式_类 Ptr, 基本类型.对象型)->引用
                 End If
+                
                 
                 指针 = 词法器.取下一个单元()
                 If 指针->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 指针)->值 = "," Then
@@ -781,7 +781,7 @@ Sub 语法_类(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
             词法器.取下一个单元()
             
             表达式(模式, 编译信息指针, 0)
-            If *表达式结果 Is 表达式格式_类型 = False OrElse Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 <> 类型类型.类 Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
+            If *表达式结果 Is 表达式格式_类型 = False OrElse *Cast(表达式格式_类型 Ptr, 表达式结果)->类型 Is 类型格式_类=False Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
             引用->父类 = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
         Else
             引用->父类 = Cast(类型格式_类 Ptr, 基本类型.对象型)->引用
@@ -1245,8 +1245,9 @@ Sub 分析因子(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr,
             If 编译信息指针->所属类节点 <> 0 Then
                 For i As Integer = LBound(编译信息指针->所属类节点->泛型表) To UBound(编译信息指针->所属类节点->泛型表)
                     If 编译信息指针->所属类节点->泛型表(i)->名称 = temp->名称 Then
-                        表达式结果 = 对象管理.加入(New 表达式格式_泛型(对象管理.加入(New 类型格式_类(编译信息指针->所属类节点->泛型表(i)->继承)), 编译信息指针->所属类节点->泛型表(i)))
-                        FindOK=True:Exit For
+                        '表达式结果 = 对象管理.加入(New 表达式格式_类型(对象管理.加入(New 类型格式_类(编译信息指针->所属类节点->泛型表(i)->继承))))
+                        表达式结果 = 对象管理.加入(New 表达式格式_类型(对象管理.加入(New 类型格式_泛型类(编译信息指针->所属类节点->泛型表(i)->继承, i))))
+                        FindOK     = True : Exit For
                     End If
                 Next
             End If
@@ -1336,15 +1337,10 @@ Sub 分析因子(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr,
         词法器.取下一个单元()
         
         表达式(模式, 编译信息指针, 0)
-        If *表达式结果 Is 表达式格式_类型 = False OrElse (Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 <> 类型类型.类 AndAlso Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 <> 类型类型.泛型类) Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
+        If *表达式结果 Is 表达式格式_类型 = False OrElse *Cast(表达式格式_类型 Ptr, 表达式结果)->类型 Is 类型格式_类=False Then 错误信息("期待类") : 代码块(模式, 编译信息指针) : Return
         
-        Dim 类型 As 类型格式 Ptr = Cast(表达式格式_类型 Ptr, 表达式结果)->类型
-        Dim 类引用   As 节点_类 Ptr
-        If Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 = 类型类型.类 Then
-            类引用 = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
-        ElseIf Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 = 类型类型.泛型类 Then
-            类引用 = Cast(类型格式_泛型类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
-        End If
+        Dim 类型   As 类型格式 Ptr = Cast(表达式格式_类型 Ptr, 表达式结果)->类型
+        Dim 类引用 As 节点_类 Ptr  = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
         
         Dim 方法引用 As 节点_方法 Ptr
         
@@ -1410,10 +1406,9 @@ Sub 分析因子(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr,
 End Sub
 
 Function 是否等同(类1 As 类型格式 Ptr, 类2 As 类型格式 Ptr) As BOOL
-    If 类1->类型 = 类型类型.类 AndAlso 类2->类型 = 类型类型.类 Then
-        Function = (Cast(类型格式_类 Ptr, 类1)->引用 = Cast(类型格式_类 Ptr, 类2)->引用)
-    ElseIf 类1->类型 = 类型类型.泛型类 AndAlso 类2->类型 = 类型类型.泛型类 Then
-        Dim temp1 As 类型格式_泛型类 Ptr = Cast(类型格式_泛型类 Ptr, 类1), temp2 As 类型格式_泛型类 Ptr = Cast(类型格式_泛型类 Ptr, 类2)
+    If *类1 Is 类型格式_类 AndAlso *类2 Is 类型格式_类 Then
+        
+        Dim temp1 As 类型格式_类 Ptr = Cast(类型格式_类 Ptr, 类1), temp2 As 类型格式_类 Ptr = Cast(类型格式_类 Ptr, 类2)
         If LBound(temp1->泛参) = LBound(temp2->泛参) AndAlso UBound(temp1->泛参) = UBound(temp2->泛参) Then
             For i As Integer = LBound(temp1->泛参) To UBound(temp1->泛参)
                 If 是否等同(temp1->泛参(i), temp2->泛参(i)) = False Then
@@ -1421,10 +1416,11 @@ Function 是否等同(类1 As 类型格式 Ptr, 类2 As 类型格式 Ptr) As BOO
                 End If
             Next
         Else
-            Function = False
+            Return False
         End If
         
-    ElseIf 类1->类型 = 类型类型.方法 AndAlso 类2->类型 = 类型类型.方法 Then
+        Function = (temp1->引用 = temp2->引用)
+    ElseIf *类1 Is 类型格式_方法 AndAlso *类2 Is 类型格式_方法 Then
         Dim temp1 As 类型格式_方法 Ptr = Cast(类型格式_方法 Ptr, 类1), temp2 As 类型格式_方法 Ptr = Cast(类型格式_方法 Ptr, 类2)
         
         If LBound(temp1->参数表) = LBound(temp2->参数表) AndAlso UBound(temp1->参数表) = UBound(temp2->参数表) Then
@@ -1450,27 +1446,27 @@ Function 是否等同(类1 As 类型格式 Ptr, 类2 As 类型格式 Ptr) As BOO
     End If
 End Function
 
-Function 是否协变(起始类 As 类型格式 Ptr,目标类 As 类型格式 Ptr,ByRef 矛盾值 As Integer) As BOOL
-   矛盾值 = 0
-   If 起始类->类型 = 类型类型.类 AndAlso 目标类->类型 = 类型类型.类 Then
-      Dim 节点索引 As 节点_类 Ptr = Cast(类型格式_类 Ptr, 起始类)->引用
-      While True
-         If 节点索引 = 0 Then
-            Exit While
-         End If
-         
-         If 节点索引 = Cast(类型格式_类 Ptr, 目标类)->引用 Then
-            Return True
-         End If
-         矛盾值 = 矛盾值 + 1
-         
-         节点索引 = 节点索引->父类
-      Wend
-      
-      Function = False
-   Else
-      Function = 是否等同(起始类, 目标类)
-   End If
+Function 是否协变(起始类 As 类型格式 Ptr, 目标类 As 类型格式 Ptr, ByRef 矛盾值 As Integer) As BOOL
+    矛盾值 = 0
+    If *起始类 Is 类型格式_类 AndAlso *目标类 Is 类型格式_类 Then
+        Dim 节点索引 As 节点_类 Ptr = Cast(类型格式_类 Ptr, 起始类)->引用
+        While True
+            If 节点索引 = 0 Then
+                Exit While
+            End If
+            
+            If 节点索引 = Cast(类型格式_类 Ptr, 目标类)->引用 Then
+                Return True
+            End If
+            矛盾值 = 矛盾值 + 1
+            
+            节点索引 = 节点索引->父类
+        Wend
+        
+        Function = False
+    Else
+        Function = 是否等同(起始类, 目标类)
+    End If
 End Function
 
 
@@ -1616,7 +1612,7 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
             End If
             链接式(模式, 编译信息指针, 项_返回)
         End If
-    ElseIf *表达式结果 Is 表达式格式_类型 AndAlso Cast(表达式格式_类型 Ptr, 表达式结果)->类型->类型 = 类型类型.类 Then
+    ElseIf *表达式结果 Is 表达式格式_类型 AndAlso *Cast(表达式格式_类型 Ptr, 表达式结果)->类型 Is 类型格式_类 Then
         If 第一个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第一个单元)->值 = ":" AndAlso 第二个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第二个单元)->值 = ":" AndAlso 第三个单元->类型 = 词法器.单元类型.标识符 Then
             词法器.取下一个单元() : 词法器.取下一个单元()
             Dim 指针     As 词法器.单元信息_标识符 Ptr = Cast(词法器.单元信息_标识符 Ptr, 词法器.取下一个单元())
@@ -1707,8 +1703,8 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
             
         ElseIf 第一个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第一个单元)->值 = "<" Then
             词法器.取下一个单元()
+            Dim 类型引用 As 类型格式_类 Ptr = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)
             Dim 类引用 As 节点_类 Ptr         = Cast(类型格式_类 Ptr, Cast(表达式格式_类型 Ptr, 表达式结果)->类型)->引用
-            Dim 临时   As 类型格式_泛型类 Ptr = 对象管理.加入(New 类型格式_泛型类(类引用))
             Dim 索引   As Integer
             Dim 指针   As 词法器.单元信息 Ptr = 词法器.窥视()
             While True
@@ -1720,9 +1716,9 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
                 表达式(模式, 编译信息指针, 0)
                 If *表达式结果 Is 表达式格式_类型 = False Then 错误信息("期待类型") : 表达式结果 = 对象管理.加入(New 表达式格式_空白) : Return
                 
-                索引 = UBound(临时->泛参) + 1
-                ReDim Preserve 临时->泛参(索引)
-                临时->泛参(索引) = Cast(表达式格式_类型 Ptr, 表达式结果)->类型
+                索引 = UBound(类型引用->泛参) + 1
+                ReDim Preserve 类型引用->泛参(索引)
+                类型引用->泛参(索引) = Cast(表达式格式_类型 Ptr, 表达式结果)->类型
                 
                 指针 = 词法器.窥视()
                 If 指针->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 指针)->值 = "," Then
@@ -1731,22 +1727,18 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
                 End If
             Wend
             
-            表达式结果 = 对象管理.加入(New 表达式格式_类型(临时))
+            表达式结果 = 对象管理.加入(New 表达式格式_类型(类型引用))
             链接式(模式, 编译信息指针, 项_返回)
         End If
         
     ElseIf *表达式结果 Is 表达式格式_值 Then
         
-        If (Cast(表达式格式_值 Ptr, 表达式结果)->值类型->类型 = 类型类型.类 OrElse Cast(表达式格式_值 Ptr, 表达式结果)->值类型->类型 = 类型类型.泛型类) AndAlso 第一个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第一个单元)->值 = "." AndAlso 第二个单元->类型 = 词法器.单元类型.标识符 Then
+        If *Cast(表达式格式_值 Ptr, 表达式结果)->值类型 Is 类型格式_类 AndAlso 第一个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第一个单元)->值 = "." AndAlso 第二个单元->类型 = 词法器.单元类型.标识符 Then
             词法器.取下一个单元()
             Dim 指针 As 词法器.单元信息_标识符 Ptr = Cast(词法器.单元信息_标识符 Ptr, 词法器.取下一个单元())
             
-            Dim 类引用 As 节点_类 Ptr
-            If Cast(表达式格式_值 Ptr, 表达式结果)->值类型->类型 = 类型类型.类 Then
-                类引用 = Cast(类型格式_类 Ptr, Cast(表达式格式_值 Ptr, 表达式结果)->值类型)->引用
-            ElseIf Cast(表达式格式_值 Ptr, 表达式结果)->值类型->类型 = 类型类型.泛型类 Then
-                类引用 = Cast(类型格式_泛型类 Ptr, Cast(表达式格式_值 Ptr, 表达式结果)->值类型)->引用
-            End If
+            Dim 类型引用 As 类型格式_类 Ptr = Cast(类型格式_类 Ptr, Cast(表达式格式_值 Ptr, 表达式结果)->值类型)
+            Dim 类引用 As 节点_类 Ptr = Cast(类型格式_类 Ptr, Cast(表达式格式_值 Ptr, 表达式结果)->值类型)->引用
             
             Dim 结果项 As 项_成员变量 Ptr
             Dim 临时项 As 项_变量 Ptr = Cast(项_变量 Ptr, 项_返回)
@@ -1766,7 +1758,7 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
             
             成员变量引用 = 0
             For i As Integer = LBound(类引用->成员表) To UBound(类引用->成员表)
-                If 类引用->成员表(i)->名称 = 指针->名称 then
+                If 类引用->成员表(i)->名称 = 指针->名称 Then
                     成员变量引用 = 类引用->成员表(i)
                     结果项->实例定位序列 = 实例定位下标 + i
                     Exit For
@@ -1775,6 +1767,11 @@ Sub 链接式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr, By
             
             If 成员变量引用 = 0 Then 错误信息("未知标识符") : 表达式结果 = 对象管理.加入(New 表达式格式_空白) : Return
             表达式结果 = 对象管理.加入(New 表达式格式_变量(成员变量引用))
+            
+            If *成员变量引用->类型 Is 类型格式_泛型类 Then
+                Cast(表达式格式_值 Ptr,表达式结果)->值类型 = 类型引用->泛参(Cast(类型格式_泛型类 Ptr, 成员变量引用->类型)->索引)
+            End If
+            
             链接式(模式, 编译信息指针, 项_返回)
         ElseIf 第一个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第一个单元)->值 = "=" AndAlso 第二个单元->类型 = 词法器.单元类型.符号 AndAlso Cast(词法器.单元信息_符号 Ptr, 第二个单元)->值 = ">" Then
             '强制转换
@@ -2130,38 +2127,32 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
     代码块(模式, 编译信息指针)
 End Sub
 
-Enum 类型类型
-   类
-   泛型类
-   方法
-End Enum
 
-Type 类型格式
-   类型 As 类型类型
+Type 类型格式 Extends Object
+    
 End Type
 
-
 Type 节点 Extends Object
-   
+    
 End Type
 
 Type 参数信息
-   名称 As String
-   类型 As 类型格式 Ptr
+    名称 As String
+    类型 As 类型格式 Ptr
 End Type
 
 Type 变量信息 Extends Object
-   名称 As String
-   类型 As 类型格式 Ptr
+    名称 As String
+    类型 As 类型格式 Ptr
 End Type
 Type 局部变量 Extends 变量信息
-   
+    
 End Type
 
 
 
 
-Type 节点_类_别名 As 节点_类
+Type 节点_类_别名   As 节点_类
 Type 节点_方法_别名 As 节点_方法
 
 
@@ -2169,115 +2160,115 @@ Type 节点_方法_别名 As 节点_方法
 Type 别名_项 As 项
 
 Type 节点_范围 Extends 节点
-   上一级 As 节点_范围 Ptr
-   
-   变量表(Any) As 局部变量 Ptr
-   项表(Any) As 别名_项 Ptr
+    上一级 As 节点_范围 Ptr
+    
+    变量表(Any) As 局部变量 Ptr
+    项表(Any)   As 别名_项 Ptr
 End Type
 
 
 Enum 方法类型
-   未知
-   实例方法
-   静态方法
-   构造方法
-   析构方法
+    未知
+    实例方法
+    静态方法
+    构造方法
+    析构方法
 End Enum
 
 Type 节点_方法 Extends 节点
-   绑定类 As 节点_类_别名 Ptr
-   
-   是否本地 As BOOL
-   
-   类型 As 方法类型
-   
-   序号 As Integer
-   用户序号 As Integer
-   
-   
-   
-   是否函数 As BOOL
-   返回值 As 类型格式 Ptr
-   
-   是否运算符 As BOOL
-   运算符 As 运算符类型
-   
-   名称 As String
-   参数表(Any) As 参数信息
-   主范围 As 节点_范围 Ptr
-   
-   方法签名摘要 As ULongInt
-   
-   完成 As BOOL
+    绑定类 As 节点_类_别名 Ptr
+    
+    是否本地 As BOOL
+    
+    类型 As 方法类型
+    
+    序号     As Integer
+    用户序号 As Integer
+    
+    
+    
+    是否函数 As BOOL
+    返回值   As 类型格式 Ptr
+    
+    是否运算符 As BOOL
+    运算符     As 运算符类型
+    
+    名称        As String
+    参数表(Any) As 参数信息
+    主范围      As 节点_范围 Ptr
+    
+    方法签名摘要 As ULongInt
+    
+    完成 As BOOL
 End Type
 
 Type 项 Extends Object
-   丢弃值 As BOOL
+    丢弃值 As BOOL
 End Type
 
 Type 项_声明局部变量 Extends 项
-   容器序列 As Integer
+    容器序列 As Integer
 End Type
 
 
 
 Type 项_范围 Extends 项
-   容器序列下标 As Integer
-   引用 As 节点_范围 Ptr
+    容器序列下标 As Integer
+    引用         As 节点_范围 Ptr
 End Type
 
 Type 项_参数 Extends 项
-   参数序列 As Integer
+    参数序列 As Integer
 End Type
 
 Type 项_变量 Extends 项
-   引用 As 变量信息 Ptr
+    引用 As 变量信息 Ptr
 End Type
 
 Type 项_局部变量 Extends 项_变量
-   容器序列 As Integer
+    容器序列 As Integer
 End Type
 Type 项_成员变量 Extends 项_变量
-   变量 As 项_变量 Ptr
-   实例定位序列 As Integer
+    变量         As 项_变量 Ptr
+    实例定位序列 As Integer
 End Type
 
 Type 项_静态变量 Extends 项_变量
-   引用 As 别名_静态变量 Ptr
+    引用 As 别名_静态变量 Ptr
 End Type
 
 Type 项_赋值 Extends 项
-   变量 As 项_变量 Ptr
-   值 As 项 Ptr
+    变量 As 项_变量 Ptr
+    值   As 项 Ptr
 End Type
 
 Type 别名_表达式格式_字面量 As 表达式格式_字面量
 
 Type 项_字面量 Extends 项
-   值 As 别名_表达式格式_字面量 Ptr
+    值 As 别名_表达式格式_字面量 Ptr
 End Type
 
 Type 项_调用 Extends 项
-   方法 As 节点_方法 Ptr
-   参数(Any) As 项 Ptr
+    方法      As 节点_方法 Ptr
+    参数(Any) As 项 Ptr
 End Type
 
 
 Type 项_返回值 Extends 项
-   值 As 项 Ptr
+    值 As 项 Ptr
 End Type
 
 Type 项_如果 Extends 项
-   条件 As 项 Ptr
-   真域 As 项_范围 Ptr
-   假域 As 项_范围 Ptr
+    条件 As 项 Ptr
+    真域 As 项_范围 Ptr
+    假域 As 项_范围 Ptr
 End Type
 
 Type 成员变量 Extends 变量信息
-   绑定类 As 节点_类_别名 Ptr
+    绑定类 As 节点_类_别名 Ptr
 End Type
 Type 静态变量 Extends 变量信息
-   绑定类 As 节点_类_别名 Ptr
+    绑定类 As 节点_类_别名 Ptr
 End Type
 
 Type 别名_节点_命名空间 As 节点_命名空间
@@ -2293,20 +2284,20 @@ End Type
 
 
 Type 节点_类 Extends 节点
-   绑定命名空间 As 别名_节点_命名空间 Ptr
-   
-   用户类 As BOOL'如果是导入的类则不是用户类，不会进行模块生成
-   
-   父类 As 节点_类 Ptr
-   
-   名称 As String
-   方法表(Any) As 节点_方法 Ptr
-   成员表(Any) As 成员变量 Ptr
-   静态变量表(Any) As 静态变量 Ptr
-   
-   泛型表(Any) As 泛型信息 Ptr
-   
-   完成 As BOOL
+    绑定命名空间 As 别名_节点_命名空间 Ptr
+    
+    用户类 As BOOL '如果是导入的类则不是用户类，不会进行模块生成
+    
+    父类 As 节点_类 Ptr
+    
+    名称            As String
+    方法表(Any)     As 节点_方法 Ptr
+    成员表(Any)     As 成员变量 Ptr
+    静态变量表(Any) As 静态变量 Ptr
+    
+    泛型表(Any) As 泛型信息 Ptr
+    
+    完成 As BOOL
 End Type
 
 
@@ -2314,219 +2305,204 @@ End Type
 
 
 Type 节点_命名空间 Extends 节点
-   上一级 As 节点_命名空间 Ptr
-   
-   名称 As String
-   类表(Any) As 节点_类 Ptr
-   命名空间表(Any) As 节点_命名空间 Ptr
+    上一级 As 节点_命名空间 Ptr
+    
+    名称            As String
+    类表(Any)       As 节点_类 Ptr
+    命名空间表(Any) As 节点_命名空间 Ptr
 End Type
 
 Type 节点_根 Extends 节点
-   根命名空间 As 节点_命名空间 Ptr
+    根命名空间 As 节点_命名空间 Ptr
 End Type
 
 
 
 
 Type 类型格式_类 Extends 类型格式
-   引用 As 节点_类 Ptr
-   
-   Declare Constructor(引用 As 节点_类 Ptr)
-End Type
-Constructor 类型格式_类(引用 As 节点_类 Ptr)
-   Base.类型 = 类型类型.类
-   This.引用 = 引用
-End Constructor
-
-
-Type 类型格式_泛型类 Extends 类型格式
     引用 As 节点_类 Ptr
     
     泛参(Any) As 类型格式 Ptr
-    Declare Constructor(引用 As 节点_类 Ptr)
+    
+    Declare Constructor(引用 As 节点_类 Ptr=0)
 End Type
 
-Constructor 类型格式_泛型类(引用 As 节点_类 Ptr)
-    Base.类型 = 类型类型.泛型类
+
+Constructor 类型格式_类(引用 As 节点_类 Ptr=0)
     This.引用 = 引用
+End Constructor
+
+Type 类型格式_泛型类 Extends 类型格式_类
+    索引 As Integer
+    Declare Constructor(引用 As 节点_类 Ptr,索引 As Integer)
+End Type
+
+Constructor 类型格式_泛型类(引用 As 节点_类 Ptr,索引 As Integer)
+    Base.引用 = 引用
+    This.索引 = 索引
 End Constructor
 
 Type 类型格式_方法 Extends 类型格式
-   是否函数 As BOOL
-   返回值 As 类型格式 Ptr
-   参数表(Any) As 类型格式 Ptr
-   Declare Constructor()
+    是否函数    As BOOL
+    返回值      As 类型格式 Ptr
+    参数表(Any) As 类型格式 Ptr
 End Type
-
-Constructor 类型格式_方法()
-   Base.类型 = 类型类型.方法
-End Constructor
 
 
 Type 表达式格式 Extends Object
-   
+    
 End Type
 
 Type 表达式格式_空白 Extends 表达式格式
-   
+    
 End Type
 Type 表达式格式_命名空间 Extends 表达式格式
-   引用 As 节点_命名空间 Ptr
-   Declare Constructor(引用 As 节点_命名空间 Ptr)
+    引用 As 节点_命名空间 Ptr
+    Declare Constructor(引用 As 节点_命名空间 Ptr)
 End Type
 Constructor 表达式格式_命名空间(引用 As 节点_命名空间 Ptr)
-   This.引用 = 引用
+    This.引用 = 引用
 End Constructor
 
 Type 表达式格式_类型 Extends 表达式格式
-   类型 As 类型格式 Ptr
-   Declare Constructor(类型 As 类型格式 Ptr=0)
+    类型 As 类型格式 Ptr
+    Declare Constructor(类型 As 类型格式 Ptr = 0)
 End Type
-Constructor 表达式格式_类型(类型 As 类型格式 Ptr=0)
-   This.类型 = 类型
-End Constructor
-
-Type 表达式格式_泛型 Extends 表达式格式_类型
-    引用 As 泛型信息 Ptr
-    Declare Constructor(类型 As 类型格式 Ptr, 引用 As 泛型信息 Ptr)
-End Type
-
-Constructor 表达式格式_泛型(类型 As 类型格式 Ptr, 引用 As 泛型信息 Ptr)
-    Base.类型 = 类型
-    This.引用 = 引用
+Constructor 表达式格式_类型(类型 As 类型格式 Ptr = 0)
+    This.类型 = 类型
 End Constructor
 
 
 
 Type 表达式格式_值 Extends 表达式格式
-   值类型 As 类型格式 Ptr
+    值类型 As 类型格式 Ptr
 End Type
 
 Type 表达式格式_返回值 Extends 表达式格式_值
-   Declare Constructor(值类型 As 类型格式 Ptr)
+    Declare Constructor(值类型 As 类型格式 Ptr)
 End Type
 Constructor 表达式格式_返回值(值类型 As 类型格式 Ptr)
-   Base.值类型 = 值类型
+    Base.值类型 = 值类型
 End Constructor
 
 Type 表达式格式_字面量 Extends 表达式格式_值
-   
+    
 End Type
 
 Type 表达式格式_方法 Extends 表达式格式_字面量
-   引用 As 节点_方法 Ptr
-   Declare Constructor(引用 As 节点_方法 Ptr)
+    引用 As 节点_方法 Ptr
+    Declare Constructor(引用 As 节点_方法 Ptr)
 End Type
 Constructor 表达式格式_方法(引用 As 节点_方法 Ptr)
-   This.引用=引用
+    This.引用 = 引用
 End Constructor
 
 Type 表达式格式_单精度浮点型 Extends 表达式格式_字面量
-   值 As Single
-   Declare Constructor(值 As Single)
+    值 As Single
+    Declare Constructor(值 As Single)
 End Type
 Constructor 表达式格式_单精度浮点型(值 As Single)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.单精度浮点型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.单精度浮点型
+    This.值 = 值
 End Constructor
 
 Type 表达式格式_双精度浮点型 Extends 表达式格式_字面量
-   值 As Double
-   Declare Constructor(值 As Double)
+    值 As Double
+    Declare Constructor(值 As Double)
 End Type
 Constructor 表达式格式_双精度浮点型(值 As Double)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.双精度浮点型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.双精度浮点型
+    This.值 = 值
 End Constructor
 Type 表达式格式_字节型 Extends 表达式格式_字面量
-   值 As Byte
-   Declare Constructor(值 As Byte)
+    值 As Byte
+    Declare Constructor(值 As Byte)
 End Type
 Constructor 表达式格式_字节型(值 As Byte)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.字节型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.字节型
+    This.值 = 值
 End Constructor
 
 Type 表达式格式_短整数型 Extends 表达式格式_字面量
-   值 As Short
-   Declare Constructor(值 As Short)
+    值 As Short
+    Declare Constructor(值 As Short)
 End Type
 Constructor 表达式格式_短整数型(值 As Short)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.短整数型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.短整数型
+    This.值 = 值
 End Constructor
 Type 表达式格式_整数型 Extends 表达式格式_字面量
-   值 As Long
-   Declare Constructor(值 As Long)
+    值 As Long
+    Declare Constructor(值 As Long)
 End Type
 Constructor 表达式格式_整数型(值 As Long)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.整数型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.整数型
+    This.值 = 值
 End Constructor
 Type 表达式格式_长整数型 Extends 表达式格式_字面量
-   值 As LongInt
-   Declare Constructor(值 As LongInt)
+    值 As LongInt
+    Declare Constructor(值 As LongInt)
 End Type
 Constructor 表达式格式_长整数型(值 As LongInt)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.长整数型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.长整数型
+    This.值 = 值
 End Constructor
 
 Type 表达式格式_逻辑型 Extends 表达式格式_字面量
-   值 As BOOL
-   Declare Constructor(值 As BOOL)
+    值 As BOOL
+    Declare Constructor(值 As BOOL)
 End Type
 Constructor 表达式格式_逻辑型(值 As BOOL)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.逻辑型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.逻辑型
+    This.值 = 值
 End Constructor
 
 Type 表达式格式_字符串 Extends 表达式格式_字面量
-   值 As String
-   Declare Constructor(值 As String)
+    值 As String
+    Declare Constructor(值 As String)
 End Type
 Constructor 表达式格式_字符串(值 As String)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.文本型
-   This.值 = 值
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 基本类型.文本型
+    This.值 = 值
 End Constructor
 
 Type 表达式格式_变量 Extends 表达式格式_值
-   变量 As 变量信息 Ptr
-   Declare Constructor(变量 As 变量信息 Ptr)
+    变量 As 变量信息 Ptr
+    Declare Constructor(变量 As 变量信息 Ptr)
 End Type
 Constructor 表达式格式_变量(变量 As 变量信息 Ptr)
-   Cast(表达式格式_值 Ptr, @This)->值类型 = 变量->类型
-   This.变量 = 变量
+    Cast(表达式格式_值 Ptr, @This)->值类型 = 变量->类型
+    This.变量 = 变量
 End Constructor
 
 Type 表达式格式_参数 Extends 表达式格式_值
-   
+    
 End Type
 
 Type 编译信息
-   现行节点 As 节点 Ptr
-   根节点 As 节点_根 Ptr
-   
-   所属命名空间节点 As 节点_命名空间 Ptr
-   所属方法节点 As 节点_方法 Ptr
-   所属类节点 As 节点_类 Ptr
-   
-   运算符方法表(Any) As 节点_方法 Ptr
+    现行节点 As 节点 Ptr
+    根节点   As 节点_根 Ptr
+    
+    所属命名空间节点 As 节点_命名空间 Ptr
+    所属方法节点     As 节点_方法 Ptr
+    所属类节点       As 节点_类 Ptr
+    
+    运算符方法表(Any) As 节点_方法 Ptr
 End Type
 
 Sub Dump_单元信息(指针 As 词法器.单元信息 Ptr)
-   Select Case 指针->类型
-      Case 词法器.单元类型.标识符
-         Print "标识符", Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
-      Case 词法器.单元类型.数字
-         Print "数字", Cast(词法器.单元信息_数字 Ptr, 指针)->值
-      Case 词法器.单元类型.字符串
-         Print "字符串", Cast(词法器.单元信息_字符串 Ptr, 指针)->值
-      Case 词法器.单元类型.符号
-         Print "符号", Cast(词法器.单元信息_符号 Ptr, 指针)->值
-      Case 词法器.单元类型.关键字
-         Print "关键字",Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
-   End Select
+    Select Case 指针->类型
+        Case 词法器.单元类型.标识符
+            Print "标识符", Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
+        Case 词法器.单元类型.数字
+            Print "数字", Cast(词法器.单元信息_数字 Ptr, 指针)->值
+        Case 词法器.单元类型.字符串
+            Print "字符串", Cast(词法器.单元信息_字符串 Ptr, 指针)->值
+        Case 词法器.单元类型.符号
+            Print "符号", Cast(词法器.单元信息_符号 Ptr, 指针)->值
+        Case 词法器.单元类型.关键字
+            Print "关键字", Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
+    End Select
 End Sub
 
 Sub 语法_表达式(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
@@ -2815,57 +2791,57 @@ End Sub
 
 
 Sub 代码块(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
-   If 词法器.是否代码尾() Then
-      Print "代码解析完成"
-      Return
-   End If
-   
-   Dim 指针 As 词法器.单元信息 Ptr = 词法器.窥视()
-   
-   Select Case 指针->类型
-      Case 词法器.单元类型.标识符
-         Print "标识符", Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
-      Case 词法器.单元类型.数字
-         Print "数字", Cast(词法器.单元信息_数字 Ptr, 指针)->值
-      Case 词法器.单元类型.字符串
-         Print "字符串", Cast(词法器.单元信息_字符串 Ptr, 指针)->值
-      Case 词法器.单元类型.符号
-         Print "符号", Cast(词法器.单元信息_符号 Ptr, 指针)->值
-      Case 词法器.单元类型.关键字
-         Print "关键字",Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
-   End Select
-   
-   Select Case 指针->类型
-      Case 词法器.单元类型.关键字
-         Select Case Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
-            Case 词法器.关键字类型.key_namespace
-               词法器.取下一个单元():语法_命名空间(模式, 编译信息指针)
-            Case 词法器.关键字类型.key_class
-               词法器.取下一个单元():语法_类(模式, 编译信息指针)
-            Case 词法器.关键字类型.key_sub
-               词法器.取下一个单元():语法_方法(模式, 编译信息指针, False)
-            Case 词法器.关键字类型.key_function
-               词法器.取下一个单元():语法_方法(模式, 编译信息指针, True)
-            Case 词法器.关键字类型.key_scope
-               词法器.取下一个单元():语法_范围(模式, 编译信息指针)
-            Case 词法器.关键字类型.key_dim
-               词法器.取下一个单元():语法_声明(模式, 编译信息指针)
-            Case 词法器.关键字类型.key_return
-               词法器.取下一个单元() : 语法_返回(模式, 编译信息指针)
-            Case 词法器.关键字类型.key_if
-               词法器.取下一个单元() : 语法_如果(模式, 编译信息指针)
-         End Select
-      Case 词法器.单元类型.符号
-         If Cast(词法器.单元信息_符号 Ptr, 指针)->值 = "}" Then '语法结束符
-            词法器.取下一个单元()
-            Print "语法结束"
-            Return
-         Else
+    If 词法器.是否代码尾() Then
+        Print "代码解析完成"
+        Return
+    End If
+    
+    Dim 指针 As 词法器.单元信息 Ptr = 词法器.窥视()
+    
+    Select Case 指针->类型
+        Case 词法器.单元类型.标识符
+            Print "标识符", Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
+        Case 词法器.单元类型.数字
+            Print "数字", Cast(词法器.单元信息_数字 Ptr, 指针)->值
+        Case 词法器.单元类型.字符串
+            Print "字符串", Cast(词法器.单元信息_字符串 Ptr, 指针)->值
+        Case 词法器.单元类型.符号
+            Print "符号", Cast(词法器.单元信息_符号 Ptr, 指针)->值
+        Case 词法器.单元类型.关键字
+            Print "关键字", Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
+    End Select
+    
+    Select Case 指针->类型
+        Case 词法器.单元类型.关键字
+            Select Case Cast(词法器.单元信息_关键字 Ptr, 指针)->类型
+                Case 词法器.关键字类型.key_namespace
+                    词法器.取下一个单元() : 语法_命名空间(模式, 编译信息指针)
+                Case 词法器.关键字类型.key_class
+                    词法器.取下一个单元() : 语法_类(模式, 编译信息指针)
+                Case 词法器.关键字类型.key_sub
+                    词法器.取下一个单元() : 语法_方法(模式, 编译信息指针, False)
+                Case 词法器.关键字类型.key_function
+                    词法器.取下一个单元() : 语法_方法(模式, 编译信息指针, True)
+                Case 词法器.关键字类型.key_scope
+                    词法器.取下一个单元() : 语法_范围(模式, 编译信息指针)
+                Case 词法器.关键字类型.key_dim
+                    词法器.取下一个单元() : 语法_声明(模式, 编译信息指针)
+                Case 词法器.关键字类型.key_return
+                    词法器.取下一个单元() : 语法_返回(模式, 编译信息指针)
+                Case 词法器.关键字类型.key_if
+                    词法器.取下一个单元() : 语法_如果(模式, 编译信息指针)
+            End Select
+        Case 词法器.单元类型.符号
+            If Cast(词法器.单元信息_符号 Ptr, 指针)->值 = "}" Then '语法结束符
+                词法器.取下一个单元()
+                Print "语法结束"
+                Return
+            Else
+                语法_表达式(模式, 编译信息指针)
+            End If
+        Case Else
             语法_表达式(模式, 编译信息指针)
-         End If
-      Case Else
-         语法_表达式(模式, 编译信息指针)
-   End Select
+    End Select
 End Sub
 
 
@@ -2900,26 +2876,26 @@ Sub 生成文式_类(临时节点类 As 节点_类 Ptr, ByRef 临时文本 As St
    临时文本 = 临时文本 + 临时节点类->名称
 End Sub
 
-Sub 生成文式_类型(临时类型格式 As 类型格式 Ptr,ByRef 临时文本 As String)
-   If 临时类型格式->类型 = 类型类型.类 Then
-      临时文本 = 临时文本 + "CLASS->"
-      生成文式_类(Cast(类型格式_类 Ptr, 临时类型格式)->引用, 临时文本)
-   ElseIf 临时类型格式->类型 = 类型类型.泛型类 Then
-      临时文本 = 临时文本 + "GENERIC->"
-      生成文式_泛型类(Cast(类型格式_泛型类 Ptr, 临时类型格式), 临时文本)
-   ElseIf 临时类型格式->类型 = 类型类型.方法 Then
-      临时文本 = 临时文本 + "METHOD->"
-      生成文式_方法(Cast(类型格式_方法 Ptr,临时类型格式), 临时文本)
-   End If
+Sub 生成文式_类型(临时类型格式 As 类型格式 Ptr, ByRef 临时文本 As String)
+    If *临时类型格式 Is 类型格式_类 Then
+        临时文本 = 临时文本 + "CLASS->"
+        生成文式_类(Cast(类型格式_类 Ptr, 临时类型格式)->引用, 临时文本)
+        生成文式_泛型(Cast(类型格式_类 Ptr, 临时类型格式), 临时文本)
+    ElseIf *临时类型格式 Is 类型格式_方法 Then
+        临时文本 = 临时文本 + "METHOD->"
+        生成文式_方法(Cast(类型格式_方法 Ptr, 临时类型格式), 临时文本)
+    End If
 End Sub
 
-Sub 生成文式_泛型类(临时类型格式 As 类型格式_泛型类 Ptr, ByRef 临时文本 As String)
+Sub 生成文式_泛型(临时类型格式 As 类型格式_类 Ptr, ByRef 临时文本 As String)
+    临时文本 = 临时文本 + "<"
     For i As Integer = LBound(临时类型格式->泛参) To UBound(临时类型格式->泛参)
         生成文式_类型(临时类型格式->泛参(i), 临时文本)
         If i <> UBound(临时类型格式->泛参) Then
             临时文本 = 临时文本 + ","
         End If
     Next
+    临时文本 = 临时文本 + ">"
 End Sub
 
 Sub 生成文式_方法(临时类型格式方法 As 类型格式_方法 Ptr, ByRef 临时文本 As String)
@@ -3157,6 +3133,7 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
     
     Open 路径 For Binary As #fhandle
     
+    Dim 文本结束 As UByte = 0
     
     '写出类本身
     Scope
@@ -3175,19 +3152,18 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
         
         Put #fhandle,, Cast(Long, ARRAYSIZE(组))
         For i As Integer = UBound(组) To LBound(组) Step -1
-            Put #fhandle,, Len(组(i))
+            Put #fhandle,, Cast(Long,Len(组(i)))
             Put #fhandle,, 组(i)
-            Write #fhandle, Cast(UByte, 0)
+            Put #fhandle,, 文本结束
         Next
-        Put #fhandle,, Len(类->名称)
+        Put #fhandle,, Cast(Long,Len(类->名称))
         Put #fhandle,, 类->名称
-        Write #fhandle, Cast(UByte, 0)
+        Put #fhandle,,文本结束
     End Scope
-    
     
     '写出父类
     If 类->父类 = 0 Then
-        Write #fhandle, Cast(UByte, 0)
+        Put #fhandle,, 文本结束
     Else
         Write #fhandle, Cast(UByte, 1)
         Scope
@@ -3206,13 +3182,13 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
             
             Put #fhandle,, Cast(Long, ARRAYSIZE(组))
             For i As Integer = UBound(组) To LBound(组) Step -1
-                Put #fhandle,, Len(组(i))
+                Put #fhandle,, Cast(Long,Len(组(i)))
                 Put #fhandle,, 组(i)
-                Write #fhandle, Cast(UByte, 0)
+                Put #fhandle,,文本结束
             Next
-            Put #fhandle,, Len(类->父类->名称)
+            Put #fhandle,, Cast(Long,Len(类->父类->名称))
             Put #fhandle,, 类->父类->名称
-            Write #fhandle, Cast(UByte, 0)
+            Put #fhandle,, 文本结束
         End Scope
     End If
     
@@ -3221,7 +3197,8 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
     Put #fhandle,, Cast(Long, ARRAYSIZE(类->方法表))
     
     For i As Integer = LBound(类->方法表) To UBound(类->方法表)
-        Write #fhandle, IIf(类->方法表(i)->是否本地, Cast(UByte, 1), Cast(UByte, 0))
+        Dim temp As UByte = IIf(类->方法表(i)->是否本地, Cast(UByte, 1), Cast(UByte, 0))
+        Put #fhandle, ,temp
         Put #fhandle,, Cast(Long, 类->方法表(i)->类型)
         
         If 类->方法表(i)->是否本地 = False Then
