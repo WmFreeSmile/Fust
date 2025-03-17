@@ -2,10 +2,15 @@
 
 Namespace 虚拟机
 
+
+Type 别名_命名空间信息 As 命名空间信息
+Type 别名_类信息 As 类信息
+Type 别名_方法信息 As 方法信息
+
 Enum 错误枚举
     
     找不到指定类
-    
+    引入父类失败
 End Enum
 
 
@@ -13,13 +18,14 @@ Dim 最后一次错误 As 错误枚举
 Dim 界目录表() As String
 Dim 类文件路径表() As String
 
+Dim 根命名空间 As 命名空间信息 Ptr
+
 Sub 加入界目录(界目录 As String)
     Dim 索引 As Integer = ubound(界目录表) + 1
     ReDim Preserve 界目录表(索引)
     界目录表(索引) = 界目录
     文件.EnumFile(界目录, 类文件路径表())
 End Sub
-
 
 Type 命名空间路径
     路径(Any) As String
@@ -30,6 +36,128 @@ Type 类路径
     类名 As String
 End Type
 
+
+Type 对象信息
+    成员表(Any) As 对象信息 Ptr
+End Type
+
+Type 方法实体 Extends Object
+    Declare Virtual Sub 调用(方法 As 别名_方法信息 Ptr,栈指针 As 对象信息 Ptr Ptr)
+End Type
+
+Sub 方法实体.调用(方法 As 别名_方法信息 Ptr,栈指针 As 对象信息 Ptr Ptr)
+    Print "调用空方法:";方法->名称
+End Sub
+
+Enum 方法类型
+    实例方法
+    静态方法
+    构造方法
+    析构方法
+End Enum
+
+
+Enum 运算符类型
+   赋值
+   
+   等于
+   不等于
+   大于等于
+   小于等于
+   大于
+   小于
+   无符号大于等于
+   无符号小于等于
+   无符号大于
+   无符号小于
+   
+   加
+   减
+   
+   乘
+   除
+   余
+   幂
+   整除
+   无符号乘
+   无符号除
+   无符号余
+   无符号整除
+   
+   与
+   或
+   左移
+   右移
+   异或
+   End Enum
+   
+Type 参数信息
+    名称 As String
+    类型 As String
+End Type
+
+Type 方法信息
+    绑定类 As 别名_类信息 Ptr
+    
+    是否本地 As BOOL
+    
+    类型 As 方法类型
+    
+    是否函数 As BOOL
+    返回值 As String
+    
+    是否运算符 As BOOL
+    运算符 As 运算符类型
+    
+    
+    
+    
+    名称 As String
+    参数表(Any) As 参数信息
+    
+    方法签名摘要 As ULongInt
+End Type
+
+Type 变量信息
+    名称 As String
+    类型 As String
+End Type
+
+Type 成员变量信息 Extends 变量信息
+    绑定类 As 别名_类信息 Ptr
+End Type
+
+Type 静态变量信息 Extends 变量信息
+    绑定类 As 别名_类信息 Ptr
+End Type
+
+Type 类信息
+    绑定命名空间 As 别名_命名空间信息 Ptr
+    
+    父类 As 类信息 Ptr
+    
+    名称 As String
+    方法表(Any) As 方法信息 Ptr
+    成员表(Any) As 成员变量信息 Ptr
+    静态变量表(Any) As 静态变量信息 Ptr
+End Type
+
+
+Type 命名空间信息
+    上一级 As 命名空间信息 Ptr
+    
+    名称 As String
+    类表(Any) As 类信息 Ptr
+    命名空间表(Any) As 命名空间信息 Ptr
+End Type
+
+
+Sub Dump_类路径(类 As 类路径)
+    For i As Integer = LBound(类.命名空间.路径) To UBound(类.命名空间.路径)
+        Print 类.命名空间.路径(i);"::";
+    Next
+    Print 类.类名
+End Sub
 
 Function 文本转命名空间路径(文本 As String) As 命名空间路径
     Dim result As 命名空间路径
@@ -49,6 +177,18 @@ Function 文本转类路径(文本 As String) As 类路径
     result.类名 = 文本组(UBound(文本组))
     Function = result
 End Function
+
+Function 读字节(f As Integer) As UByte
+    Dim result As UByte
+    Get #f,, result
+    Function = result
+End Function
+Function 读整数(f As Integer) As Long
+    Dim result As Long
+    Get #f,, result
+    Function = result
+End Function
+
 
 Function 读文本(f As Integer) As String
     Dim 长度 As Long
@@ -101,7 +241,7 @@ Function 类路径是否相同(类1 As 类路径,类2 As 类路径) As BOOL
 End Function
 
 
-Function 寻找类文件(类 As 类路径, ByRef 返回值 As String) As BOOL
+Function 寻找类文件(类 As 类路径, ByRef 返回值 As String="") As BOOL
     For i As Integer = LBound(类文件路径表) To UBound(类文件路径表)
         If 类路径是否相同(取类路径(类文件路径表(i)),类) Then
             返回值 = 类文件路径表(i)
@@ -113,32 +253,157 @@ Function 寻找类文件(类 As 类路径, ByRef 返回值 As String) As BOOL
     Function = False
 End Function
 
-Function 引入类(类 As 类路径) As BOOL
+Function 引入类(类 As 类路径,ByRef 返回值 As 类信息 Ptr=0) As BOOL
     Dim 类文件路径 As String
-    If 寻找类文件(类, 类文件路径) = False Then Return False
-    Function = 加载类(类文件路径)
+    If 寻找类文件(类, 类文件路径) = False Then 
+        Return False
+    End If
+    Function = 加载类(类文件路径,返回值)
 End Function
 
-Function 加载类(类文件路径 As String) As BOOL
+Function 架构命名空间(命名空间 As 命名空间路径) As 命名空间信息 Ptr
+    Dim 节点索引 As 命名空间信息 Ptr = 根命名空间
+    Dim 临时节点 As 命名空间信息 Ptr
+    For i As Integer = LBound(命名空间.路径) To UBound(命名空间.路径)
+        临时节点 = 0
+        For j As Integer = LBound(节点索引->命名空间表) To UBound(节点索引->命名空间表)
+            If 节点索引->命名空间表(j)->名称 = 命名空间.路径(i) Then
+                临时节点 = 节点索引->命名空间表(j)
+                Exit For
+            End If
+        Next
+        If 临时节点 = 0 Then
+            临时节点 = New 命名空间信息
+            Dim 索引 As Integer
+            索引 = UBound(节点索引->命名空间表) + 1
+            ReDim Preserve 节点索引->命名空间表(索引)
+            节点索引->命名空间表(索引) = 临时节点
+        End If
+        节点索引 = 临时节点
+    Next
+    Function = 临时节点
+End Function
+
+Function 寻找命名空间(命名空间 As 命名空间路径, ByRef 返回值 As 命名空间信息 Ptr = 0) As BOOL
+    Dim 节点索引 As 命名空间信息 Ptr = 根命名空间
+    Dim 临时节点 As 命名空间信息 Ptr
+    For i As Integer = LBound(命名空间.路径) To UBound(命名空间.路径)
+        临时节点 = 0
+        For j As Integer = LBound(节点索引->命名空间表) To UBound(节点索引->命名空间表)
+            If 节点索引->命名空间表(j)->名称 = 命名空间.路径(i) Then
+                临时节点 = 节点索引->命名空间表(j)
+                Exit For
+            End If
+        Next
+        If 临时节点 = 0 Then
+            Return False
+        End If
+        节点索引 = 临时节点
+    Next
+    返回值 = 临时节点
+    Function = true
+End Function
+
+Function 寻找类(类 As 类路径,ByRef 返回值 As 类信息 Ptr=0) As BOOL
+    Dim 命名空间 As 命名空间信息 Ptr
+    If 寻找命名空间(类.命名空间,命名空间)=False Then Return False
+    For i As Integer = LBound(命名空间->类表) To UBound(命名空间->类表)
+        If 命名空间->类表(i)->名称 = 类.类名 Then
+            返回值 = 命名空间->类表(i) : Return True
+        End If
+    Next
+    Function = False
+End Function
+
+Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0) As BOOL
     Dim fhandle As Integer = FreeFile
     Open 类文件路径 For Binary As #fhandle
     
+    Dim 长度 As Long
+    
+    Dim 是否超类 As BOOL
     
     Dim 本类路径 As 类路径
+    Dim 父类路径 As 类路径
     
+    Dim 本类对象 As 类信息 Ptr
+    Dim 父类对象 As 类信息 Ptr
     
     读类路径(fhandle, 本类路径)
     
     
+    If 寻找类(本类路径, 返回值) Then Return True
     
+    是否超类 = (读字节(fhandle) = 0)
+    If 是否超类 = False Then
+        读类路径(fhandle, 父类路径)
+        If 引入类(父类路径,父类对象) = False Then
+            最后一次错误 = 错误枚举.引入父类失败
+            Return False
+        End If
+    End If
+    
+    本类对象 = New 类信息
+    本类对象->绑定命名空间 = 架构命名空间(本类路径.命名空间)
+    
+    本类对象->父类 = 父类对象
+    本类对象->名称 = 本类路径.类名
+    
+    Dim 索引 As Integer
+    
+    长度 = 读整数(fhandle)
+    For i As Integer = 1 To 长度
+        索引 = UBound(本类对象->方法表) + 1
+        ReDim Preserve 本类对象->方法表(索引)
+        本类对象->方法表(索引) = New 方法信息
+        
+        本类对象->方法表(索引)->绑定类 = 本类对象
+        
+        本类对象->方法表(索引)->是否本地 = (读字节(fhandle) = 1)
+        本类对象->方法表(索引)->类型 = 读整数(fhandle)
+        本类对象->方法表(索引)->是否函数 = (读字节(fhandle) = 1)
+        
+        If 本类对象->方法表(索引)->是否函数 Then
+            本类对象->方法表(索引)->返回值 = 读文本(fhandle)
+        End If
+        
+        本类对象->方法表(索引)->是否运算符 = (读字节(fhandle) = 1)
+        If 本类对象->方法表(索引)->是否运算符 Then
+            本类对象->方法表(索引)->运算符 = 读整数(fhandle)
+        End If
+        
+        本类对象->方法表(索引)->名称 = 读文本(fhandle)
+        
+    Next
+
     
     Close fhandle
+    
+    
+    返回值 = 本类对象
+    Function = True
 End Function
 
-Sub 启动()
+
+
+Sub 测试()
     加入界目录("C:\Users\WmFreeSmile\Desktop\fust\编译器\release64\code")
-    引入类(文本转类路径("Root::User::Program"))
+    引入类(文本转类路径("User::Program"))
     
+    Print "End"
+    Sleep
+End Sub
+
+
+Sub 启动()
+    根命名空间 = New 命名空间信息
+    根命名空间->名称 = "Root"
+    
+    
+    测试()
+    
+    
+    Delete 根命名空间
 End Sub
 
 

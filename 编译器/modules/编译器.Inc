@@ -794,23 +794,23 @@ Sub 语法_类(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
     
     Dim 临时文本 As String
     生成文式_类(引用, 临时文本)
-    If 临时文本 = "Root::Kernel::Lang::Float" Then
+    If 临时文本 = "Kernel::Lang::Float" Then
         基本类型.单精度浮点型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Double" Then
+    ElseIf 临时文本 = "Kernel::Lang::Double" Then
         基本类型.双精度浮点型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Byte" Then
+    ElseIf 临时文本 = "Kernel::Lang::Byte" Then
         基本类型.字节型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Short" Then
+    ElseIf 临时文本 = "Kernel::Lang::Short" Then
         基本类型.短整数型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Int" Then
+    ElseIf 临时文本 = "Kernel::Lang::Int" Then
         基本类型.整数型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Long" Then
+    ElseIf 临时文本 = "Kernel::Lang::Long" Then
         基本类型.长整数型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::String" Then
+    ElseIf 临时文本 = "Kernel::Lang::String" Then
         基本类型.文本型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Bool" Then
+    ElseIf 临时文本 = "Kernel::Lang::Bool" Then
         基本类型.逻辑型 = 对象管理.加入(New 类型格式_类(引用))
-    ElseIf 临时文本 = "Root::Kernel::Lang::Object" Then
+    ElseIf 临时文本 = "Kernel::Lang::Object" Then
         引用->父类 = 0 'Object不允许有父类，擦除父类
         基本类型.对象型 = 对象管理.加入(New 类型格式_类(引用))
     End If
@@ -1873,7 +1873,7 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
     Dim 指针 As 词法器.单元信息 Ptr
     
     Dim 是否本地     As BOOL
-    Dim 类型         As 方法类型 = 方法类型.未知
+    Dim 类型         As 方法类型
     Dim 方法签名     As String
     Dim 方法签名摘要 As ULongInt
     Dim 方法名       As String
@@ -1971,7 +1971,7 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
         Else
             错误信息("期待标识符或者关键字'operator'") : 代码块(模式, 编译信息指针) : Return
         End If
-    ElseIf 类型 = 方法类型.未知 Then
+    Else
         If 指针->类型 = 词法器.单元类型.符号 Then
             类型 = 方法类型.析构方法
             指针 = 词法器.取下一个单元()
@@ -2168,7 +2168,6 @@ End Type
 
 
 Enum 方法类型
-    未知
     实例方法
     静态方法
     构造方法
@@ -2184,8 +2183,6 @@ Type 节点_方法 Extends 节点
     
     序号     As Integer
     用户序号 As Integer
-    
-    
     
     是否函数 As BOOL
     返回值   As 类型格式 Ptr
@@ -2854,20 +2851,20 @@ Sub 解析器(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr)
 End Sub
 
 
-Sub 生成文式_命名空间(临时节点命名空间 As 节点_命名空间 Ptr,ByRef 临时文本 As String)
-   Dim 节点索引 As 节点_命名空间 Ptr = 临时节点命名空间
-   Dim temp As String
-   While True
-      If 节点索引 = 0 Then
-         Exit While
-      End If
-      temp = 节点索引->名称 + temp
-      节点索引 = 节点索引->上一级
-      If 节点索引 <> 0 Then
-         temp = "::" + temp
-      End If
-   Wend
-   临时文本 = 临时文本 + temp
+Sub 生成文式_命名空间(临时节点命名空间 As 节点_命名空间 Ptr, ByRef 临时文本 As String)
+    Dim 节点索引 As 节点_命名空间 Ptr = 临时节点命名空间
+    Dim temp     As String
+    While True
+        If 节点索引->上一级 = 0 Then
+            Exit While
+        End If
+        temp     = 节点索引->名称 + temp
+        节点索引 = 节点索引->上一级
+        If 节点索引->上一级 <> 0 Then
+            temp = "::" + temp
+        End If
+    Wend
+    临时文本 = 临时文本 + temp
 End Sub
 
 Sub 生成文式_类(临时节点类 As 节点_类 Ptr, ByRef 临时文本 As String)
@@ -3133,14 +3130,14 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
     
     Open 路径 For Binary As #fhandle
     
-    Dim 文本结束 As UByte = 0
+    Dim temp As UByte
     
     '写出类本身
     Scope
         Dim 节点索引 As 节点_命名空间 Ptr = 类->绑定命名空间
         Dim 组()     As String
         While True
-            If 节点索引 = 0 Then
+            If 节点索引->上一级 = 0 Then
                 Exit While
             End If
             Dim 索引 As Integer
@@ -3154,23 +3151,23 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
         For i As Integer = UBound(组) To LBound(组) Step -1
             Put #fhandle,, Cast(Long,Len(组(i)))
             Put #fhandle,, 组(i)
-            Put #fhandle,, 文本结束
+            temp=0:Put #fhandle,, temp
         Next
         Put #fhandle,, Cast(Long,Len(类->名称))
         Put #fhandle,, 类->名称
-        Put #fhandle,,文本结束
+        temp=0:Put #fhandle,,temp
     End Scope
     
     '写出父类
     If 类->父类 = 0 Then
-        Put #fhandle,, 文本结束
+        temp=0:Put #fhandle,, temp
     Else
-        Write #fhandle, Cast(UByte, 1)
+        temp=1:Put #fhandle, ,temp
         Scope
             Dim 节点索引 As 节点_命名空间 Ptr = 类->父类->绑定命名空间
             Dim 组()     As String
             While True
-                If 节点索引 = 0 Then
+                If 节点索引->上一级 = 0 Then
                     Exit While
                 End If
                 Dim 索引 As Integer
@@ -3179,16 +3176,15 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
                 组(索引) = 节点索引->名称
                 节点索引 = 节点索引->上一级
             Wend
-            
             Put #fhandle,, Cast(Long, ARRAYSIZE(组))
             For i As Integer = UBound(组) To LBound(组) Step -1
                 Put #fhandle,, Cast(Long,Len(组(i)))
                 Put #fhandle,, 组(i)
-                Put #fhandle,,文本结束
+                temp=0:Put #fhandle,, temp
             Next
             Put #fhandle,, Cast(Long,Len(类->父类->名称))
             Put #fhandle,, 类->父类->名称
-            Put #fhandle,, 文本结束
+            temp=0:Put #fhandle,, temp
         End Scope
     End If
     
@@ -3197,13 +3193,40 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
     Put #fhandle,, Cast(Long, ARRAYSIZE(类->方法表))
     
     For i As Integer = LBound(类->方法表) To UBound(类->方法表)
-        Dim temp As UByte = IIf(类->方法表(i)->是否本地, Cast(UByte, 1), Cast(UByte, 0))
-        Put #fhandle, ,temp
-        Put #fhandle,, Cast(Long, 类->方法表(i)->类型)
+        Dim 方法引用 As 节点_方法 Ptr = 类->方法表(i)
         
-        If 类->方法表(i)->是否本地 = False Then
-            Dim temp As 方法信息 Ptr = Cast(方法信息 Ptr, 方法映射.寻找(类->方法表(i)))
-            Put #fhandle,, temp->计数器 '此时计数器便是长度
+        temp = IIf(方法引用->是否本地, Cast(UByte, 1), Cast(UByte, 0))
+        Put #fhandle,, temp
+        Put #fhandle,, Cast(Long, 方法引用->类型)
+        
+        temp = IIf(方法引用->是否函数, Cast(UByte, 1), Cast(UByte, 0))
+        Put #fhandle,, temp
+        
+        If 方法引用->是否函数 Then
+            Dim 返回值_文式 As String
+            生成文式_类型(方法引用->返回值, 返回值_文式)
+            
+            Put #fhandle,, Cast(Long,Len(返回值_文式))
+            Put #fhandle,, 返回值_文式
+            temp=0:Put #fhandle,, temp
+        End If
+        
+        temp = IIf(方法引用->是否运算符, Cast(UByte, 1), Cast(UByte, 0))
+        Put #fhandle,, temp
+        
+        If 方法引用->是否运算符 Then
+            Put #fhandle,, Cast(Long, 方法引用->运算符)
+        End If
+        
+        Put #fhandle,, Cast(Long,Len(方法引用->名称))
+        Put #fhandle,, 方法引用->名称
+        temp=0:Put #fhandle,, temp
+        
+        Put #fhandle,, Cast(Long, ARRAYSIZE(类->方法表))
+        
+        If 方法引用->是否本地 = False Then
+            Dim temp As 方法信息 Ptr = Cast(方法信息 Ptr, 方法映射.寻找(方法引用))
+            Put #fhandle,, Cast(Long, ARRAYSIZE(temp->字节码表)) '此时计数器便是长度
             Put #fhandle,, temp->字节码表()
         End If
     Next

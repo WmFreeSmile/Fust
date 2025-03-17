@@ -23,7 +23,7 @@ Build=4
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=41
+FileBuild=79
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -35,12 +35,12 @@ ProductName=
 
 [Objects]
 Form=.\forms\Form1.frm|0|4||Yes|
-Module=.\modules\虚拟机.Inc|122|3850||Yes|
-Module=.\modules\文件.Inc|0|446||Yes|
+Module=.\modules\虚拟机.Inc|354|10431||Yes|
+Module=.\modules\文件.Inc|9|446||Yes|
 
-TopTab=.\modules\虚拟机.Inc|True|0|122|3850
-TopTab=#FF_WinMain#|False|0|0|1134
-TopTab=.\modules\文件.Inc|False|0|0|446
+TopTab=.\modules\虚拟机.Inc|True|0|354|10431
+TopTab=#FF_WinMain#|False|0|7|1134
+TopTab=.\modules\文件.Inc|False|0|9|446
 #END_MAIN_PROPERTIES#
 
 
