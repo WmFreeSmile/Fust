@@ -23,7 +23,7 @@ Build=15
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=941
+FileBuild=963
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -36,7 +36,7 @@ ProductName=
 [Objects]
 Module=.\modules\表.Inc|0|31||Yes|
 Module=.\modules\词法器.Inc|121|1994||Yes|
-Module=.\modules\编译器.Inc|3220|155252||Yes|
+Module=.\modules\编译器.Inc|3229|156226||Yes|
 Module=.\modules\文件.Inc|57|1603||Yes|
 Module=.\modules\对象管理.Inc|0|49||Yes|
 Module=.\modules\宏.Inc|18|1411||Yes|
@@ -44,7 +44,7 @@ Module=.\modules\哈希算法.Inc|0|45||Yes|
 Form=.\forms\Form1.frm|0|4||Yes|
 
 TopTab=#FF_WinMain#|False|0|5|1125
-TopTab=.\modules\编译器.Inc|True|0|3211|155140
+TopTab=.\modules\编译器.Inc|True|0|3229|156226
 TopTab=.\modules\文件.Inc|False|0|57|1603
 TopTab=.\modules\对象管理.Inc|False|0|0|49
 TopTab=.\modules\词法器.Inc|False|0|121|1994

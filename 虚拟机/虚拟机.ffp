@@ -11,19 +11,19 @@ OmitInformation=0
 StartupIcon=
 UseWinXPthemes=-1
 StrUnicode=0
-UseAdminPriv=0
+UseAdminPriv=-1
 DeleteGeneratedCode=-1
 Namespace=0
-AddCompOps= -gen gas64
+AddCompOps= -gen gcc -O 2
 LastRunFilename=虚拟机.exe
 Major=1
 Minor=0
 Revision=0
-Build=4
+Build=109
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=79
+FileBuild=193
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -35,10 +35,10 @@ ProductName=
 
 [Objects]
 Form=.\forms\Form1.frm|0|4||Yes|
-Module=.\modules\虚拟机.Inc|354|10431||Yes|
+Module=.\modules\虚拟机.Inc|845|27057||Yes|
 Module=.\modules\文件.Inc|9|446||Yes|
 
-TopTab=.\modules\虚拟机.Inc|True|0|354|10431
+TopTab=.\modules\虚拟机.Inc|True|0|845|27057
 TopTab=#FF_WinMain#|False|0|7|1134
 TopTab=.\modules\文件.Inc|False|0|9|446
 #END_MAIN_PROPERTIES#

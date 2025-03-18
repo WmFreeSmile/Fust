@@ -136,6 +136,7 @@ Enum 字节码
    保存
    静态保存
    成员保存
+   成员读取
    加载整数
    加载文本
    加载逻辑
@@ -216,7 +217,7 @@ Sub 方法信息.编码数据()
             Dim 节点索引 As 节点_命名空间 Ptr = Cast(单元_静态读取 Ptr, This.流空间(j))->引用->绑定类->绑定命名空间
             Dim 组()     As String
             While True
-                If 节点索引 = 0 Then
+                If 节点索引->上一级 = 0 Then
                     Exit While
                 End If
                 Dim 索引 As Integer
@@ -266,7 +267,7 @@ Sub 方法信息.编码数据()
             Dim 节点索引 As 节点_命名空间 Ptr = Cast(单元_调用 Ptr, This.流空间(j))->方法->绑定类->绑定命名空间
             Dim 组()     As String
             While True
-                If 节点索引 = 0 Then
+                If 节点索引->上一级 = 0 Then
                     Exit While
                 End If
                 Dim 索引 As Integer
@@ -321,7 +322,7 @@ Sub 方法信息.编码数据()
             Dim 节点索引 As 节点_命名空间 Ptr = Cast(单元_静态读取 Ptr, This.流空间(j))->引用->绑定类->绑定命名空间
             Dim 组()     As String
             While True
-                If 节点索引 = 0 Then
+                If 节点索引->上一级 = 0 Then
                     Exit While
                 End If
                 Dim 索引 As Integer
@@ -368,7 +369,15 @@ Sub 方法信息.编码数据()
             
             索引 = UBound(字节码表) + 1
             ReDim Preserve 字节码表(UBound(字节码表) + 4)
-             *Cast(Long Ptr, @字节码表(索引)) = Cast(单元_成员保存 Ptr, This.流空间(j))->实例定位序列
+            *Cast(Long Ptr, @字节码表(索引)) = Cast(单元_成员保存 Ptr, This.流空间(j))->实例定位序列
+        ElseIf *This.流空间(j) Is 单元_成员读取 Then
+            索引 = UBound(字节码表) + 1
+            ReDim Preserve 字节码表(UBound(字节码表) + 1)
+            字节码表(索引) = 字节码.成员读取
+            
+            索引 = UBound(字节码表) + 1
+            ReDim Preserve 字节码表(UBound(字节码表) + 4)
+             *Cast(Long Ptr, @字节码表(索引)) = Cast(单元_成员读取 Ptr, This.流空间(j))->实例定位序列
         ElseIf *This.流空间(j) Is 单元_加载整数 Then
             索引 = UBound(字节码表) + 1
             ReDim Preserve 字节码表(UBound(字节码表) + 1)
@@ -422,11 +431,11 @@ Sub 方法信息.编码数据()
             
             索引 = UBound(字节码表) + 1
             ReDim Preserve 字节码表(UBound(字节码表) + 4)
-             *Cast(Long Ptr, @字节码表(索引)) = 取占位符位置(Cast(单元_如果 Ptr, This.流空间(j))->真目标)
+            *Cast(Long Ptr, @字节码表(索引)) = 取占位符位置(Cast(单元_如果 Ptr, This.流空间(j))->真目标) - Cast(实单元 Ptr,This.流空间(j))->位置
             
             索引 = UBound(字节码表) + 1
             ReDim Preserve 字节码表(UBound(字节码表) + 4)
-             *Cast(Long Ptr, @字节码表(索引)) = 取占位符位置(Cast(单元_如果 Ptr, This.流空间(j))->假目标)
+             *Cast(Long Ptr, @字节码表(索引)) = 取占位符位置(Cast(单元_如果 Ptr, This.流空间(j))->假目标)- Cast(实单元 Ptr,This.流空间(j))->位置
         End If
     Next
 End Sub
@@ -3189,6 +3198,37 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
     End If
     
     
+    
+    '写出成员
+    Put #fhandle,, Cast(Long, ARRAYSIZE(类->成员表))
+    For i As Integer = LBound(类->成员表) To UBound(类->成员表)
+        Dim 类型_文式 As String
+        生成文式_类型(类->成员表(i)->类型, 类型_文式)
+        
+        Put #fhandle,, Cast(Long, Len(类->成员表(i)->名称))
+        Put #fhandle,, 类->成员表(i)->名称
+        temp = 0 : Put #fhandle,, temp
+        
+        Put #fhandle,, Cast(Long, Len(类型_文式))
+        Put #fhandle,, 类型_文式
+        temp = 0 : Put #fhandle,, temp
+    Next
+    
+    '写出静态变量
+    Put #fhandle,, Cast(Long, ARRAYSIZE(类->静态变量表))
+    For i As Integer = LBound(类->静态变量表) To UBound(类->静态变量表)
+        Dim 类型_文式 As String
+        生成文式_类型(类->静态变量表(i)->类型, 类型_文式)
+        
+        Put #fhandle,, Cast(Long, Len(类->静态变量表(i)->名称))
+        Put #fhandle,, 类->静态变量表(i)->名称
+        temp = 0 : Put #fhandle,, temp
+        
+        Put #fhandle,, Cast(Long, Len(类型_文式))
+        Put #fhandle,, 类型_文式
+        temp = 0 : Put #fhandle,, temp
+    Next
+    
     '写出方法
     Put #fhandle,, Cast(Long, ARRAYSIZE(类->方法表))
     
@@ -3201,6 +3241,8 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
         
         temp = IIf(方法引用->是否函数, Cast(UByte, 1), Cast(UByte, 0))
         Put #fhandle,, temp
+        
+        'Print 方法引用->方法签名摘要,方法引用->名称
         
         If 方法引用->是否函数 Then
             Dim 返回值_文式 As String
@@ -3222,26 +3264,32 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
         Put #fhandle,, 方法引用->名称
         temp=0:Put #fhandle,, temp
         
-        Put #fhandle,, Cast(Long, ARRAYSIZE(类->方法表))
+        
+        Put #fhandle,, Cast(Long, ARRAYSIZE(方法引用->参数表))
+        For j As Integer = LBound(方法引用->参数表) To UBound(方法引用->参数表)
+            Dim 参数_文式 As String
+            生成文式_类型(方法引用->参数表(j).类型, 参数_文式)
+            
+            Put #fhandle,, Cast(Long, Len(方法引用->参数表(j).名称))
+            Put #fhandle,, 方法引用->参数表(j).名称
+            temp = 0 : Put #fhandle,, temp
+            
+            
+            Put #fhandle,, Cast(Long, Len(参数_文式))
+            Put #fhandle,, 参数_文式
+            temp = 0 : Put #fhandle,, temp
+        Next
+        
+        Put #fhandle,, 方法引用->方法签名摘要
         
         If 方法引用->是否本地 = False Then
             Dim temp As 方法信息 Ptr = Cast(方法信息 Ptr, 方法映射.寻找(方法引用))
-            Put #fhandle,, Cast(Long, ARRAYSIZE(temp->字节码表)) '此时计数器便是长度
+            Put #fhandle,, Cast(Long, temp->计数器)
             Put #fhandle,, temp->字节码表()
         End If
     Next
     
-    '写出成员
-    Put #fhandle,, Cast(Long, ARRAYSIZE(类->成员表))
-    For i As Integer = LBound(类->成员表) To UBound(类->成员表)
-        
-    Next
-    
-    '写出静态变量
-    Put #fhandle,, Cast(Long, ARRAYSIZE(类->静态变量表))
-    For i As Integer = LBound(类->静态变量表) To UBound(类->静态变量表)
-        
-    Next
+
     
     Close fhandle
 End Sub
