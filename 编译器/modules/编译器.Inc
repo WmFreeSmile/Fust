@@ -1890,6 +1890,8 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
     Dim 是否运算符     As BOOL = False
     Dim 重载运算符类型 As 运算符类型
     
+    Dim 是否入口 As BOOL = False
+    
     If *编译信息指针->现行节点 Is 节点_类 = False Then
         错误信息("在非'类域'创建'方法'") : 代码块(模式, 编译信息指针) : Return
     End If
@@ -1974,6 +1976,8 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
             Print "运算符", 类型
             方法签名 = IIf(是否函数, "T", "F") + IIf(是否本地, "T", "F") + Str(类型) + "%" + Str(重载运算符类型)
             
+        ElseIf 指针->类型 = 词法器.单元类型.关键字 AndAlso Cast(词法器.单元信息_关键字 Ptr, 指针)->类型 = 词法器.关键字类型.key_enter Then
+            是否入口 = True
         ElseIf 指针->类型 = 词法器.单元类型.标识符 Then
             方法签名 = IIf(是否函数, "T", "F") + IIf(是否本地, "T", "F") + Str(类型) + Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
             方法名   = Cast(词法器.单元信息_标识符 Ptr, 指针)->名称
@@ -2017,6 +2021,7 @@ Sub 语法_方法(模式 As 解析模式, 编译信息指针 As 编译信息 Ptr
         temp->是否运算符 = 是否运算符
         temp->运算符     = 重载运算符类型
         temp->是否本地   = 是否本地
+        temp->是否入口   = 是否入口
         
         If 是否运算符 Then
             Dim 索引 As Integer
@@ -2204,6 +2209,8 @@ Type 节点_方法 Extends 节点
     主范围      As 节点_范围 Ptr
     
     方法签名摘要 As ULongInt
+    
+    是否入口 As BOOL
     
     完成 As BOOL
 End Type
@@ -3063,6 +3070,8 @@ Sub 编译(代码路径 As String, 结果路径 As String)
     For i As Integer = LBound(方法映射.表) To UBound(方法映射.表)
         Print Str(Cast(节点_方法 Ptr, 方法映射.表(i).起始)->方法签名摘要) + IIf(Cast(节点_方法 Ptr, 方法映射.表(i).起始)->名称 <> "", "-" + Cast(节点_方法 Ptr, 方法映射.表(i).起始)->名称, "") ;":"
         生成中间语言(Cast(节点_方法 Ptr, 方法映射.表(i).起始)->主范围, 方法映射.表(i).目标, 0)
+        Cast(方法信息 Ptr, 方法映射.表(i).目标)->指令_返回()
+        
         Cast(方法信息 Ptr, 方法映射.表(i).目标)->编码数据()
         
         Dim temp As 方法信息 Ptr = Cast(方法信息 Ptr, 方法映射.表(i).目标)
@@ -3260,10 +3269,13 @@ Sub 写出类(路径 As String, 类 As 节点_类 Ptr)
             Put #fhandle,, Cast(Long, 方法引用->运算符)
         End If
         
+        temp = IIf(方法引用->是否入口, Cast(UByte, 1), Cast(UByte, 0))
+        Put #fhandle,, temp
+        
+        
         Put #fhandle,, Cast(Long,Len(方法引用->名称))
         Put #fhandle,, 方法引用->名称
         temp=0:Put #fhandle,, temp
-        
         
         Put #fhandle,, Cast(Long, ARRAYSIZE(方法引用->参数表))
         For j As Integer = LBound(方法引用->参数表) To UBound(方法引用->参数表)

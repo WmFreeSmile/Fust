@@ -1,5 +1,5 @@
 ﻿#VisualFreeBasic_Project#  Version=5.8.11
-NumObjects=6
+NumObjects=7
 ProjectName=虚拟机
 CompilationMode=0
 CompilationDebug=0
@@ -14,16 +14,16 @@ StrUnicode=0
 UseAdminPriv=-1
 DeleteGeneratedCode=-1
 Namespace=0
-AddCompOps= -gen gcc -O 2
+AddCompOps= -gen gcc -O 3
 LastRunFilename=虚拟机.exe
 Major=1
 Minor=0
 Revision=0
-Build=109
+Build=263
 FileMajor=1
 FileMinor=0
 FileRevision=0
-FileBuild=193
+FileBuild=281
 AutoIncrement=3
 DefaultCompiler=64
 Comments=
@@ -34,13 +34,15 @@ LegalTrademarks=
 ProductName=
 
 [Objects]
+Module=.\modules\Map.Inc|0|25||Yes|
+Module=.\modules\虚拟机.Inc|116|2489||Yes|
+Module=.\modules\文件.Inc|11|525||Yes|
 Form=.\forms\Form1.frm|0|4||Yes|
-Module=.\modules\虚拟机.Inc|845|27057||Yes|
-Module=.\modules\文件.Inc|9|446||Yes|
 
-TopTab=.\modules\虚拟机.Inc|True|0|845|27057
-TopTab=#FF_WinMain#|False|0|7|1134
-TopTab=.\modules\文件.Inc|False|0|9|446
+TopTab=.\modules\虚拟机.Inc|True|0|68|2472
+TopTab=.\modules\文件.Inc|False|0|11|525
+TopTab=#FF_AppStart#|False|0|5|1461
+TopTab=.\modules\Map.Inc|False|0|0|25
 #END_MAIN_PROPERTIES#
 
 
@@ -57,6 +59,9 @@ TopTab=.\modules\文件.Inc|False|0|9|446
 #include Once "afx/CWindow.inc" 'WinFBX 库，是WIN系统增强基础库，使用窗口和控件必须要用到它。
 #include Once "vbcompat.bi"     '一些兼容VB的语句和常数，不包含就会无法使用它们了。
 #include Once "fbthread.bi"     'VisualFreeBasic线程语句支持库，要用线程语句，就必须包含。
+
+#include "MAP.bi"
+MMapTemplate(ULongInt, Integer)
 
 '以上 包含文件 会影响最终编译生成文件的大小，而不会影响运行效率，对于文件大小比较敏感的，可以根据需要调整。
 

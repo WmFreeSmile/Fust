@@ -1,6 +1,15 @@
 ﻿
-
 Namespace 虚拟机
+
+
+const 最大栈尺寸 as integer = 8196
+
+
+
+Sub 内存复制(目标 As Any Ptr, 源 As Any Ptr, 长度 As Integer)
+    memcpy(目标, 源, 长度)
+End Sub
+
 
 
 Type 别名_命名空间信息 As 命名空间信息
@@ -9,6 +18,10 @@ Type 别名_方法信息 As 方法信息
 
 Type 别名_静态变量信息 As 静态变量信息
 
+
+MMapTemplate(ULongInt, Integer)
+
+
 Enum 错误枚举
     
     找不到指定类
@@ -16,7 +29,27 @@ Enum 错误枚举
     未找到静态变量
     未找到方法
 End Enum
-    
+
+Enum 操作码枚举
+   空操作
+   如果
+   返回
+   加载参数
+   丢弃
+   读取
+   静态读取
+   调用
+   新建
+   保存
+   静态保存
+   成员保存
+   成员读取
+   加载整数
+   加载文本
+   加载逻辑
+   创建变量
+   销毁变量
+End Enum
 
 Enum 字节码枚举
    如果
@@ -44,8 +77,14 @@ Dim 类文件路径表() As String
 
 Dim 根命名空间 As 命名空间信息 Ptr
 
+Dim 根引用() As 对象信息 Ptr
+
+Dim 入口方法表() As 方法信息 Ptr
+
+Dim 常量表() As 常量信息 Ptr
+
 Sub 加入界目录(界目录 As String)
-    Dim 索引 As Integer = ubound(界目录表) + 1
+    Dim 索引 As Integer = UBound(界目录表) + 1
     ReDim Preserve 界目录表(索引)
     界目录表(索引) = 界目录
     文件.EnumFile(界目录, 类文件路径表())
@@ -72,16 +111,33 @@ End Type
 
 
 Type 对象信息
-    成员表(Any) As 对象信息 Ptr
+    成员表 As 对象信息 Ptr Ptr
+    虚方法表 As TMAPULONGINTINTEGER Ptr
 End Type
 
 Type 方法实体 Extends Object
-    Declare Virtual Sub 调用(方法 As 别名_方法信息 Ptr,栈指针 As 对象信息 Ptr Ptr)
+    Declare Virtual Sub 调用(方法 As 别名_方法信息 Ptr,栈指针 As 对象信息 Ptr Ptr, 参数表 As 对象信息 Ptr Ptr)
 End Type
 
-Sub 方法实体.调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr)
+Sub 方法实体.调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr, 参数表 As 对象信息 Ptr Ptr)
     Print "调用空方法:";方法->名称
 End Sub
+
+Type 常量信息 Extends Object
+    对象 As 对象信息 Ptr
+End Type
+
+Type 常量信息_整数 Extends 常量信息
+    值 As Long
+End Type
+
+Type 常量信息_文本 Extends 常量信息
+    值 As String
+End Type
+
+Type 常量信息_逻辑 Extends 常量信息
+    值 As BOOL
+End Type
 
 Type 指令信息
     操作码 As UByte
@@ -108,6 +164,12 @@ Type 指令信息_调用 Extends 指令信息
     引用 As 别名_方法信息 Ptr
 End Type
 
+Type 指令信息_新建 Extends 指令信息
+    方法 As 别名_方法信息 Ptr
+    成员表尺寸 As Integer
+End Type
+
+
 Type 指令信息_保存 Extends 指令信息
     序列 As Long
 End Type
@@ -124,23 +186,23 @@ Type 指令信息_成员读取 Extends 指令信息
     实例定位序列 As Long
 End Type
 
-Type 指令信息_加载整数 extends 指令信息
-    值 As Long
+Type 指令信息_加载整数 Extends 指令信息
+    值 As 常量信息 Ptr
 End Type
 
 Type 指令信息_加载文本 extends 指令信息
-    值 As String
+    值 As 常量信息 Ptr
 End Type
 
-Type 指令信息_加载逻辑 extends 指令信息
-    值 As BOOL
+Type 指令信息_加载逻辑 Extends 指令信息
+    值 As 常量信息 Ptr
 End Type
 
-Type 指令信息_创建变量 extends 指令信息
+Type 指令信息_创建变量 Extends 指令信息
     序列 As Long
 End Type
 
-Type 指令信息_销毁变量 extends 指令信息
+Type 指令信息_销毁变量 Extends 指令信息
     序列 As Long
 End Type
 
@@ -148,22 +210,45 @@ End Type
 Type 方法实体_字节码 Extends 方法实体
     指令表(Any) As 指令信息 Ptr
     
-    Declare Sub 调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr) Override
+    Declare Sub 调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr, 参数表 As 对象信息 Ptr Ptr) Override
 End Type
 
-Sub 方法实体_字节码.调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr)
-    Dim 指令指针 As 指令信息 Ptr = @This.指令表(0)
+
+
+Function 创建对象(方法 As 方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr, 成员表尺寸 As Integer) As 对象信息 Ptr
+    Dim result As 对象信息 Ptr = New 对象信息
     
+    result->成员表 = Allocate(SizeOf(对象信息 Ptr) *成员表尺寸)
+    result->虚方法表 = New TMAPULONGINTINTEGER
     
+    Dim 参数表 As 对象信息 Ptr Ptr = Allocate(SizeOf(对象信息 Ptr) * (ARRAYSIZE(方法->参数表) + 1))
+    *参数表 = result
+    
+    内存复制(*参数表 + 1, *栈指针 + ARRAYSIZE(方法->参数表), SizeOf(对象信息 Ptr) *ARRAYSIZE(方法->参数表))
+    *栈指针 = *栈指针 - ARRAYSIZE(方法->参数表)
+    
+    方法->实体->调用(方法, 栈指针, 参数表)
+    Deallocate(参数表)
+    
+    Function = result
+End Function
+
+
+Sub 方法实体_字节码.调用(方法 As 别名_方法信息 Ptr, 栈指针 As 对象信息 Ptr Ptr, 参数表 As 对象信息 Ptr Ptr)
+    Dim 指令指针 As 指令信息 Ptr Ptr = @This.指令表(0)
+    
+    Goto start
     
     指令_如果:_
     
+    '( *栈指针 -0)->
+    
+    *栈指针 = *栈指针 + 2
     
     Goto skip
     
     指令_返回:_
-    
-    
+    Goto quit
     Goto skip
     
     
@@ -186,6 +271,11 @@ Sub 方法实体_字节码.调用(方法 As 别名_方法信息 Ptr, 栈指针 A
     
     
     指令_调用 : _
+    
+    Goto skip
+    
+    指令_新建:_
+    创建对象(Cast(指令信息_新建 Ptr, *指令指针)->方法, 栈指针, Cast(指令信息_新建 Ptr, *指令指针)->成员表尺寸)
     
     Goto skip
     
@@ -230,17 +320,17 @@ Sub 方法实体_字节码.调用(方法 As 别名_方法信息 Ptr, 栈指针 A
     skip : _
     指令指针 = 指令指针 + 1
     
-    
     start : _
-    MsgBox 指令指针->操作码
-    On 指令指针->操作码 Goto _
+    Print "code", ( *指令指针)->操作码
+    On (*指令指针)->操作码 Goto _
     指令_如果, _
     指令_返回,_
     指令_加载参数,_
     指令_丢弃,_
     指令_读取,_
     指令_静态读取,_
-    指令_调用,_
+    指令_调用, _
+    指令_新建,_
     指令_保存,_
     指令_静态保存,_
     指令_成员保存,_
@@ -251,11 +341,11 @@ Sub 方法实体_字节码.调用(方法 As 别名_方法信息 Ptr, 栈指针 A
     指令_创建变量, _
     指令_销毁变量
     
+    Goto skip
+    
     quit : _
     
-    
 End Sub
-
 
 Enum 方法类型
     实例方法
@@ -321,6 +411,8 @@ Type 方法信息
     参数表(Any) As 参数信息
     
     方法签名摘要 As ULongInt
+    
+    是否入口 As BOOL
     
     实体 As 方法实体 Ptr
 End Type
@@ -400,6 +492,21 @@ Function 文本转类路径(文本 As String) As 类路径
         result.命名空间.路径(i) = 文本组(i)
     Next
     result.类名 = 文本组(UBound(文本组))
+    Function = result
+End Function
+
+Function 文本转方法路径(文本 As String) As 方法路径
+    Dim result As 方法路径
+    
+    Dim 文本组() As String
+    vbSplit(文本, "::", 文本组())
+    ReDim result.类.命名空间.路径(UBound(文本组) -2)
+    For i As Integer = LBound(文本组) To UBound(文本组) -2
+        result.类.命名空间.路径(i) = 文本组(i)
+    Next
+    result.类.类名 = 文本组(UBound(文本组) -1)
+    result.方法签名摘要 = ValULng(文本组(UBound(文本组)))
+    
     Function = result
 End Function
 
@@ -606,7 +713,7 @@ Function 引入方法(方法 As 方法路径,ByRef 返回值 As 方法信息 Ptr
     Function = False
 End Function
 
-Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0) As BOOL
+Function 加载类(类文件路径 As String, ByRef 返回值 As 类信息 Ptr = 0) As BOOL
     Dim fhandle As Integer = FreeFile
     Open 类文件路径 For Binary As #fhandle
     
@@ -700,8 +807,15 @@ Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0)
             方法引用->运算符 = 读整数(fhandle)
         End If
         
-        方法引用->名称 = 读文本(fhandle)
+        方法引用->是否入口 = (读字节(fhandle) = 1)
+        If 方法引用->是否入口 Then
+            Dim 索引 As Integer
+            索引 = UBound(入口方法表) + 1
+            ReDim Preserve 入口方法表(索引)
+            入口方法表(索引) = 方法引用
+        End If
         
+        方法引用->名称 = 读文本(fhandle)
         
         长度 = 读整数(fhandle)
         ReDim 方法引用->参数表(长度 -1)
@@ -733,60 +847,69 @@ Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0)
                         Dim 假目标 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_如果
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.如果
                         Cast(指令信息_如果 Ptr, 指令)->真目标 = 真目标
                         Cast(指令信息_如果 Ptr, 指令)->假目标 = 假目标
                     Case 字节码枚举.返回
                         指令 = New 指令信息
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.返回
                         
                     Case 字节码枚举.加载参数
                         Dim 序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_加载参数
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.加载参数
                         Cast(指令信息_加载参数 Ptr, 指令)->序列 = 序列
                     Case 字节码枚举.丢弃
                         指令 = New 指令信息
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.丢弃
                     Case 字节码枚举.读取
                         Dim 序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_读取
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.读取
                         Cast(指令信息_读取 Ptr, 指令)->序列 = 序列
                     Case 字节码枚举.静态读取
                         Dim 静态成员 As 静态成员路径
                         读静态成员路径(fhandle, 静态成员)
                         
                         指令 = New 指令信息_静态读取
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.静态读取
                         If 引入静态变量(静态成员, Cast(指令信息_静态读取 Ptr, 指令)->引用) = False Then 
                             最后一次错误 = 错误枚举.未找到静态变量
                             Return False
                         End If
                     Case 字节码枚举.调用
                         Dim 方法 As 方法路径
+                        Dim 方法引用 As 方法信息 Ptr
                         读方法路径(fhandle, 方法)
-                        指令 = New 指令信息_调用
-                        指令->操作码 = 字节码 + 1
-                        If 引入方法(方法, Cast(指令信息_调用 Ptr, 指令)->引用) = False Then 
+                        If 引入方法(方法, 方法引用) = False Then 
                             最后一次错误 = 错误枚举.未找到方法
                             Return False
+                        End If
+                        If 方法引用->类型 = 方法类型.构造方法 Then
+                            指令 = New 指令信息_新建
+                            指令->操作码 = 操作码枚举.新建
+                            Cast(指令信息_新建 Ptr, 指令)->方法 = 方法引用
+                            Cast(指令信息_新建 Ptr, 指令)->成员表尺寸 = ARRAYSIZE(方法引用->绑定类->成员表)
+                        Else
+                            指令 = New 指令信息_调用
+                            指令->操作码 = 操作码枚举.调用
+                            Cast(指令信息_调用 Ptr, 指令)->引用 = 方法引用
                         End If
                         
                     Case 字节码枚举.保存
                         Dim 序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_保存
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.保存
                         Cast(指令信息_保存 Ptr, 指令)->序列 = 序列
                     Case 字节码枚举.静态保存
                         Dim 静态成员 As 静态成员路径
                         读静态成员路径(fhandle, 静态成员)
                         
                         指令 = New 指令信息_静态保存
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.静态保存
                         If 引入静态变量(静态成员, Cast(指令信息_静态保存 Ptr, 指令)->引用) = False Then 
                             最后一次错误 = 错误枚举.未找到静态变量
                             Return False
@@ -795,43 +918,57 @@ Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0)
                         Dim 实例定位序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_成员保存
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.成员保存
                         Cast(指令信息_成员保存 Ptr, 指令)->实例定位序列 = 实例定位序列
                     Case 字节码枚举.成员读取
                         Dim 实例定位序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_成员读取
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.成员读取
                         Cast(指令信息_成员读取 Ptr, 指令)->实例定位序列 = 实例定位序列
                     Case 字节码枚举.加载整数
                         Dim 值 As Long = 读整数(fhandle)
+                        Dim 索引 As Integer
                         
                         指令 = New 指令信息_加载整数
-                        指令->操作码 = 字节码 + 1
-                        Cast(指令信息_加载整数 Ptr, 指令)->值 = 值
+                        指令->操作码 = 操作码枚举.加载整数
+                        Cast(指令信息_加载整数 Ptr, 指令)->值 = New 常量信息_整数
+                        
+                        索引 = UBound(常量表) + 1
+                        ReDim Preserve 常量表(索引)
+                        常量表(索引) = Cast(指令信息_加载整数 Ptr, 指令)->值
+                        
                     Case 字节码枚举.加载文本
                         Dim 值 As String = 读文本(fhandle)
                         
                         指令 = New 指令信息_加载文本
-                        指令->操作码 = 字节码 + 1
-                        Cast(指令信息_加载文本 Ptr, 指令)->值 = 值
+                        指令->操作码 = 操作码枚举.加载文本
+                        Cast(指令信息_加载文本 Ptr, 指令)->值 = New 常量信息_文本
+                        
+                        索引 = UBound(常量表) + 1
+                        ReDim Preserve 常量表(索引)
+                        常量表(索引) = Cast(指令信息_加载文本 Ptr, 指令)->值
                     Case 字节码枚举.加载逻辑
                         Dim 值 As BOOL = 读整数(fhandle)
                         
                         指令 = New 指令信息_加载逻辑
-                        指令->操作码 = 字节码 + 1
-                        Cast(指令信息_加载逻辑 Ptr, 指令)->值 = 值
+                        指令->操作码 = 操作码枚举.加载逻辑
+                        Cast(指令信息_加载逻辑 Ptr, 指令)->值 = New 常量信息_逻辑
+                        
+                        索引 = UBound(常量表) + 1
+                        ReDim Preserve 常量表(索引)
+                        常量表(索引) = Cast(指令信息_加载逻辑 Ptr, 指令)->值
                     Case 字节码枚举.创建变量
                         Dim 序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_创建变量
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.创建变量
                         Cast(指令信息_创建变量 Ptr, 指令)->序列 = 序列
                     Case 字节码枚举.销毁变量
                         Dim 序列 As Long = 读整数(fhandle)
                         
                         指令 = New 指令信息_销毁变量
-                        指令->操作码 = 字节码 + 1
+                        指令->操作码 = 操作码枚举.销毁变量
                         Cast(指令信息_销毁变量 Ptr, 指令)->序列 = 序列
                 End Select
                 
@@ -850,21 +987,57 @@ Function 加载类(类文件路径 As String,ByRef 返回值 As 类信息 Ptr=0)
 End Function
 
 
+Type 线程传入信息
+    方法 As 方法信息 Ptr
+    参数表 As 对象信息 Ptr Ptr
+    
+    条件 As Any Ptr
+    条件互斥锁 As Any Ptr
+End Type
+
+Sub 工作线程(信息 As 线程传入信息 Ptr)
+    Dim 方法 As 方法信息 Ptr = 信息->方法
+    Dim 参数表 As 对象信息 Ptr Ptr = 信息->参数表
+    
+    MutexLock(信息->条件互斥锁)
+    CondBroadcast 信息->条件
+    MutexUnlock(信息->条件互斥锁)
+    
+    Dim 栈空间(最大栈尺寸 -1) As 对象信息 Ptr
+    Dim 栈指针 As 对象信息 Ptr Ptr = @栈空间(UBound(栈空间))
+    
+    方法->实体->调用(方法, 栈指针, 参数表)
+    
+    'For i As Integer = UBound(栈空间) To UBound(栈空间) - 参数数量 + 1 Step -1
+    '    栈空间(i) = 参数表[UBound(栈空间) - i]
+    'Next
+End Sub
+
+Function 启动线程方法(方法 As 方法信息 Ptr, 参数表 As 对象信息 Ptr Ptr=0) As Any Ptr
+    Dim 信息 As 线程传入信息 Ptr = New 线程传入信息
+    信息->条件 = CondCreate()
+    信息->条件互斥锁 = MutexCreate()
+    信息->方法 = 方法
+    信息->参数表 = 参数表
+    
+    Function = ThreadCreate(@工作线程, 信息)
+    
+    MutexLock(信息->条件互斥锁)
+    CondWait(信息->条件, 信息->条件互斥锁)
+    MutexUnlock(信息->条件互斥锁)
+    
+    CondDestroy(信息->条件)
+    MutexDestroy(信息->条件互斥锁)
+    Delete 信息
+End Function
+
+
 Sub 测试()
     加入界目录("C:\Users\WmFreeSmile\Desktop\fust\编译器\release64\code")
     
-    Dim 类 As 类信息 Ptr
-    Print 引入类(文本转类路径("User::Program"), 类), 最后一次错误
-    
-    For i As Integer = LBound(类->方法表) to ubound(类->方法表)
-        If 类->方法表(i)->名称 = "main" then
-            
-            Exit For
-        End If
-    Next
-    
-    
-    
+End Sub
+
+Sub 测试2()
     Print "End"
     Sleep
 End Sub
@@ -875,6 +1048,24 @@ Sub 启动()
     根命名空间->名称 = "Root"
     
     测试()
+    
+    '先引入Program类，触发类依赖链，建立类架构
+    Print 引入类(文本转类路径("User::Program")), 最后一次错误
+    
+    '调用每个类的入口方法
+    For i As Integer = LBound(入口方法表) To UBound(入口方法表)
+        Print "start_enter:";入口方法表(i)
+        ThreadWait 启动线程方法(入口方法表(i))
+    Next
+    
+    
+    
+    Dim 方法 As 方法信息 Ptr
+    If 引入方法(文本转方法路径("User::Program::14841474095010590698"), 方法) Then
+        ThreadWait 启动线程方法(方法)
+    End If
+    
+    测试2()
     
     Delete 根命名空间
 End Sub

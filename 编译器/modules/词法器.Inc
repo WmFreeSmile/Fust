@@ -127,6 +127,7 @@ key_scope
 key_true
 key_false
 key_new
+key_enter
 
 End Enum
 
@@ -375,110 +376,112 @@ Sub 三连窥视(ByRef 第一个单元 As 单元信息 Ptr, ByRef 第二个单�
 End Sub
 
 Function 取下一个单元() As 单元信息 Ptr
-   Dim result As 单元信息 Ptr 
-   
-   If 是否代码尾() Then
-      result = 对象管理.加入(New 单元信息)
-      result->类型 = 单元类型.终止
-      Return result
-   End If
-   
-   跳过空格()
-   If 是否数字表达式() Then
-      Dim 是否小数 As BOOL
-      Dim 值 As String
-      值 = 数字表达式(是否小数)
-      
-      result = 对象管理.加入(New 单元信息_数字(是否小数, 值))
-   ElseIf 是否字符串表达式() Then
-      Dim 值 As String
-      值 = 字符串表达式()
-      
-      result = 对象管理.加入(New 单元信息_字符串(值))
-   ElseIf 是否不是标识符首(Mid(源, 位置, 1)) Then
-      If Mid(源, 位置, 1) = "@" Then
-         result = 对象管理.加入(New 单元信息)
-         result->类型 = 单元类型.跃点
-      Else
-         result = 对象管理.加入(New 单元信息_符号(Mid(源, 位置, 1)))
-      End If
-      
-      位置 = 位置 + 1
-   Else
-      Dim temp As String
-      temp = 标识符()
-      Select Case temp
-         Case "namespace"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_namespace))
-         Case "class"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_class))
-         Case "enum"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_enum))
-         Case "dim"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_dim))
-         Case "function"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_function))
-         Case "sub"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_sub))
-         Case "return"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_return))
-         Case "print"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_print))
-         Case "load"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_load))
-         Case "import"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_import))
-         Case "use"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_use))
-         Case "if"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_if))
-         Case "for"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_for))
-         Case "while"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_while))
-         Case "do"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_do))
-         Case "break"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_break))
-         Case "continue"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_continue))
-         Case "as"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_as))
-            'class
-         Case "abstract"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_abstract))
-         Case "extends"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_extends))
-         Case "static"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_static))
-         Case "virtual"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_virtual))
-         Case "operator"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_operator))
-         Case "native"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_native))
-         Case "self"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_self))
-            'if
-         Case "else"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_else))
-            'other
-         Case "scope"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_scope))
-         Case "true"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_true))
-         Case "false"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_false))
-         Case "new"
-            result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_new))
-         Case Else
-            result = 对象管理.加入(New 单元信息_标识符(temp))
-      End Select
-   End If
-   跳过空格()
-   result->行 = 获取行号(位置)
-   
-   Function = result
+    Dim result As 单元信息 Ptr
+    
+    If 是否代码尾() Then
+        result       = 对象管理.加入(New 单元信息)
+        result->类型 = 单元类型.终止
+        Return result
+    End If
+    
+    跳过空格()
+    If 是否数字表达式() Then
+        Dim 是否小数 As BOOL
+        Dim 值       As String
+        值 = 数字表达式(是否小数)
+        
+        result = 对象管理.加入(New 单元信息_数字(是否小数, 值))
+    ElseIf 是否字符串表达式() Then
+        Dim 值 As String
+        值 = 字符串表达式()
+        
+        result = 对象管理.加入(New 单元信息_字符串(值))
+    ElseIf 是否不是标识符首(Mid(源, 位置, 1)) Then
+        If Mid(源, 位置, 1) = "@" Then
+            result       = 对象管理.加入(New 单元信息)
+            result->类型 = 单元类型.跃点
+        Else
+            result = 对象管理.加入(New 单元信息_符号(Mid(源, 位置, 1)))
+        End If
+        
+        位置 = 位置 + 1
+    Else
+        Dim temp As String
+        temp = 标识符()
+        Select Case temp
+            Case "namespace"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_namespace))
+            Case "class"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_class))
+            Case "enum"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_enum))
+            Case "dim"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_dim))
+            Case "function"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_function))
+            Case "sub"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_sub))
+            Case "return"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_return))
+            Case "print"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_print))
+            Case "load"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_load))
+            Case "import"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_import))
+            Case "use"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_use))
+            Case "if"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_if))
+            Case "for"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_for))
+            Case "while"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_while))
+            Case "do"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_do))
+            Case "break"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_break))
+            Case "continue"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_continue))
+            Case "as"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_as))
+                'class
+            Case "abstract"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_abstract))
+            Case "extends"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_extends))
+            Case "static"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_static))
+            Case "virtual"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_virtual))
+            Case "operator"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_operator))
+            Case "native"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_native))
+            Case "self"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_self))
+                'if
+            Case "else"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_else))
+                'other
+            Case "scope"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_scope))
+            Case "true"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_true))
+            Case "false"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_false))
+            Case "new"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_new))
+            Case "enter"
+                result = 对象管理.加入(New 单元信息_关键字(关键字类型.key_enter))
+            Case Else
+                result = 对象管理.加入(New 单元信息_标识符(temp))
+        End Select
+    End If
+    跳过空格()
+    result->行 = 获取行号(位置)
+    
+    Function = result
 End Function
 
 
